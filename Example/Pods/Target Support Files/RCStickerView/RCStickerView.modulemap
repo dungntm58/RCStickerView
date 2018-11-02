@@ -1,0 +1,6 @@
+framework module RCStickerView {
+  umbrella header "RCStickerView-umbrella.h"
+
+  export *
+  module * { export * }
+}

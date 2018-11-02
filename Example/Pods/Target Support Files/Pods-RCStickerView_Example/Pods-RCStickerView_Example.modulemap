@@ -1,0 +1,6 @@
+framework module Pods_RCStickerView_Example {
+  umbrella header "Pods-RCStickerView_Example-umbrella.h"
+
+  export *
+  module * { export * }
+}

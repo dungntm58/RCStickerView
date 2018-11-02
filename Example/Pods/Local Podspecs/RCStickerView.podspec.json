@@ -1,0 +1,22 @@
+{
+  "name": "RCStickerView",
+  "version": "0.1.0",
+  "summary": "A short description of RCStickerView.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/dungntm58/RCStickerView",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "dungntm58": "minhdung.uet.work@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/dungntm58/RCStickerView.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "RCStickerView/Classes/**/*"
+}
