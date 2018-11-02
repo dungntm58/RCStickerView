@@ -20,7 +20,7 @@ public enum RCStickerViewPosition: Int {
     case bottomRight
 }
 
-@objc protocol RCStickerViewDelegate: class {
+@objc public protocol RCStickerViewDelegate: class {
     @objc optional func stickerViewDidBeginMoving(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidChangeMoving(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidEndMoving(_ stickerView: RCStickerView)
@@ -52,7 +52,7 @@ open class RCStickerView: UIView {
     
     private var contentView: UIView!
     
-    @IBOutlet weak var delegate: RCStickerViewDelegate?
+    @IBOutlet open weak var delegate: RCStickerViewDelegate?
     
     private lazy var moveGesture: UIPanGestureRecognizer = {
         return UIPanGestureRecognizer(target: self, action: #selector(handleMoveGesture(_:)))
@@ -105,7 +105,7 @@ open class RCStickerView: UIView {
         return _flipImageView
     }()
     
-    func set(image: UIImage?, for handler: RCStickerViewHandler) {
+    open func set(image: UIImage?, for handler: RCStickerViewHandler) {
         switch handler {
         case .close:
             self.closeImageView.image = image
@@ -116,7 +116,7 @@ open class RCStickerView: UIView {
         }
     }
     
-    func set(position: RCStickerViewPosition, for handler: RCStickerViewHandler) {
+    open func set(position: RCStickerViewPosition, for handler: RCStickerViewHandler) {
         let origin = self.contentView.frame.origin
         let size = self.contentView.frame.size
         let handlerView: UIView
@@ -150,7 +150,7 @@ open class RCStickerView: UIView {
     
     open var handlerSize: CGFloat {
         set(size) {
-            if (size <= 0) {
+            guard size > 0 else {
                 return
             }
             
@@ -213,7 +213,7 @@ open class RCStickerView: UIView {
         }
     }
     
-    var shouldShowEditingHandlers: Bool = true {
+    open var shouldShowEditingHandlers: Bool = true {
         didSet {
             if shouldShowEditingHandlers {
                 self.contentView.layer.borderWidth = 2
@@ -247,7 +247,7 @@ open class RCStickerView: UIView {
     
     // MARK: - UIView
     
-    init(contentView: UIView) {
+    public init(contentView: UIView) {
         defaultInset = 11
         defaultMinimumSize = 4 * defaultInset
         
