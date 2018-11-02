@@ -11,6 +11,10 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Requirements
 
+- Xcode 10.
+- Swift 4.0.
+- iOS 9.0 or higher.
+
 ## Installation
 
 RCStickerView is available through [CocoaPods](https://cocoapods.org). To install
@@ -19,6 +23,20 @@ it, simply add the following line to your Podfile:
 ```ruby
 pod 'RCStickerView'
 ```
+
+Then, run the following command:
+
+```bash
+$ pod install
+```
+
+## Usage
+
+
+
+## Inspiration
+
+RCStickerView is heavily inspired by CHTStickerView.
 
 ## Author
 

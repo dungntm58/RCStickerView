@@ -31,7 +31,7 @@ public enum RCStickerViewPosition: Int {
     @objc optional func stickerViewDidTap(_ stickerView: RCStickerView)
 }
 
-open class RCStickerView: UIView {
+public class RCStickerView: UIView {
     private var defaultInset: CGFloat = 0
     private var defaultMinimumSize: CGFloat = 0
     
@@ -76,6 +76,10 @@ open class RCStickerView: UIView {
     
     private lazy var tapGesture: UITapGestureRecognizer = {
         return UITapGestureRecognizer(target: self, action: #selector(handleTapGesture(_:)))
+    }()
+    
+    private lazy var zoomGesture: UIPinchGestureRecognizer = {
+        return UIPinchGestureRecognizer(target: self, action: #selector(handleZoomGesture(_:)))
     }()
     
     private lazy var closeImageView: UIImageView = {
@@ -253,17 +257,45 @@ open class RCStickerView: UIView {
         
         let frame = CGRect(x: 0, y: 0, width: contentView.frame.width + defaultInset * 2, height: contentView.frame.height + defaultInset * 2)
         super.init(frame: frame)
-        self.backgroundColor = .clear
-        addGestureRecognizer(self.moveGesture)
-        addGestureRecognizer(self.tapGesture)
+        set(contentView: contentView)
+        initView()
+    }
+    
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        defaultInset = 11
+        defaultMinimumSize = 4 * defaultInset
+        initView()
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    open func set(contentView: UIView) {
+        self.contentView?.removeFromSuperview()
         
-        // Setup content view
         self.contentView = contentView
         self.contentView.center = center
         self.contentView.isUserInteractionEnabled = false
         self.contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.contentView.layer.allowsEdgeAntialiasing = true
         self.addSubview(contentView)
+        
+        self.contentView.layer.borderColor = outlineBorderColor.cgColor
+    }
+}
+
+private extension RCStickerView {
+    func addGestures() {
+        addGestureRecognizer(self.moveGesture)
+        addGestureRecognizer(self.tapGesture)
+        addGestureRecognizer(self.zoomGesture)
+    }
+    
+    func initView() {
+        self.backgroundColor = .clear
+        addGestures()
         
         // Setup editing handlers
         self.set(position: .topLeft, for: .close)
@@ -279,16 +311,12 @@ open class RCStickerView: UIView {
         self.isEnableFlip = true
         
         self._minimumSize = defaultMinimumSize
-        self.contentView.layer.borderColor = outlineBorderColor.cgColor
-    }
-    
-    required public init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
     }
 }
 
+// MARK: - Gesture Handlers
+
 private extension RCStickerView {
-    // MARK: - Gesture Handlers
     
     @objc func handleMoveGesture(_ recognizer: UIPanGestureRecognizer) {
         let touchLocation = recognizer.location(in: self.superview)
@@ -341,8 +369,8 @@ private extension RCStickerView {
     }
     
     @objc func handleCloseGesture(_ recognizer: UITapGestureRecognizer) {
-        self.delegate?.stickerViewDidClose?(self)
         self.removeFromSuperview()
+        self.delegate?.stickerViewDidClose?(self)
     }
     
     @objc func handleFlipGesture(_ recognizer: UITapGestureRecognizer) {
@@ -355,6 +383,26 @@ private extension RCStickerView {
         self.delegate?.stickerViewDidTap?(self)
     }
     
+    @objc func handleZoomGesture(_ recognize: UIPinchGestureRecognizer) {
+        switch recognize.state {
+        case .changed:
+            let pinchCenter = CGPoint(x: recognize.location(in: contentView).x - contentView.bounds.midX,
+                                      y: recognize.location(in: contentView).y - contentView.bounds.midY)
+            let transform = contentView.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
+                .scaledBy(x: recognize.scale, y: recognize.scale)
+                .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
+            contentView.transform = transform
+            recognize.scale = 1
+        case .ended:
+            // Nice animation to scale down when releasing the pinch.
+            // OPTIONAL
+            UIView.animate(withDuration: 0.35) {
+                self.contentView.transform = .identity
+            }
+        default:
+            return
+        }
+    }
 }
 
 extension RCStickerView: UIGestureRecognizerDelegate {
