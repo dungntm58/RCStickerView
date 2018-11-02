@@ -7,11 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1308E0DA218C548C0085CB26 /* RCStickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1308E0D9218C548C0085CB26 /* RCStickerView.swift */; };
+		1308E0DC218C57AB0085CB26 /* Util+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1308E0DB218C57AB0085CB26 /* Util+Extension.swift */; };
 		24BC48843CC7F55B24B243A7936FE502 /* Pods-RCStickerView_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 9A1E8449AE965C1E558FCA3955593AC0 /* Pods-RCStickerView_Example-dummy.m */; };
 		5913AD63866DEF96C6B7AE8CE797B07E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6DFF15000AFE2A371BF499E7AFDA808 /* Foundation.framework */; };
 		59510689BBA92502255030E974631052 /* RCStickerView-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = AAC9205781DC188EBB9278A95C67B367 /* RCStickerView-dummy.m */; };
 		5C90F65ABBB214D18664919474432741 /* Pods-RCStickerView_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = B97473DD1CFFE57339F9BD00903ED1EA /* Pods-RCStickerView_Tests-dummy.m */; };
-		65A74FFEED5D6C4A15C6903A5578E8ED /* ReplaceMe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58ACF548835B30E6B50733B638A298FB /* ReplaceMe.swift */; };
 		69D0585B6601000C74B4C3457DE958FA /* Pods-RCStickerView_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 2709584C26280813156980CA7346ECD2 /* Pods-RCStickerView_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8C34CBD9DA5BE8A84B560472EE9F123B /* RCStickerView-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 8ABE1713952FB166878817F1AFC05D35 /* RCStickerView-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		96290E06AA09B4BA96878C90056F533E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6DFF15000AFE2A371BF499E7AFDA808 /* Foundation.framework */; };
@@ -31,6 +32,8 @@
 
 /* Begin PBXFileReference section */
 		082D461ABDA8F63FCC53DE3687D07E5F /* Pods-RCStickerView_Example-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-RCStickerView_Example-resources.sh"; sourceTree = "<group>"; };
+		1308E0D9218C548C0085CB26 /* RCStickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RCStickerView.swift; path = RCStickerView/Classes/RCStickerView.swift; sourceTree = "<group>"; };
+		1308E0DB218C57AB0085CB26 /* Util+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Util+Extension.swift"; path = "RCStickerView/Classes/Util+Extension.swift"; sourceTree = "<group>"; };
 		1789E3539419AEEF709741600891177C /* Pods-RCStickerView_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-RCStickerView_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
 		1D33857262D36D3416BC88DD44590A75 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1F38FA502FE2C66C3E8BDD4A89A2B491 /* RCStickerView.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; path = RCStickerView.podspec; sourceTree = "<group>"; };
@@ -41,7 +44,6 @@
 		4440F4FA3EB3655F10F41D35A1A608FF /* Pods_RCStickerView_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RCStickerView_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A5729F85BEE5106FCD11882015A1339 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4F233EAD06CE3DEF81730862DDA673E1 /* Pods-RCStickerView_Tests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-RCStickerView_Tests.modulemap"; sourceTree = "<group>"; };
-		58ACF548835B30E6B50733B638A298FB /* ReplaceMe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ReplaceMe.swift; path = RCStickerView/Classes/ReplaceMe.swift; sourceTree = "<group>"; };
 		5B4B69F96CBB2C203BF8D971F8DD40A5 /* Pods-RCStickerView_Tests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-RCStickerView_Tests-umbrella.h"; sourceTree = "<group>"; };
 		679B90BFE0F3925040F5E288842E649B /* Pods-RCStickerView_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-RCStickerView_Example-acknowledgements.plist"; sourceTree = "<group>"; };
 		6993411998F9C97E63C80A09AB3E51E4 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -98,9 +100,10 @@
 		0D7061C96006EE136C34519DE9FFCDC8 /* RCStickerView */ = {
 			isa = PBXGroup;
 			children = (
-				58ACF548835B30E6B50733B638A298FB /* ReplaceMe.swift */,
 				959CCAC14CB8EE977A4C336B6A96C9A6 /* Pod */,
 				2749C698355530CBCCF57BFF2D8BB0BD /* Support Files */,
+				1308E0D9218C548C0085CB26 /* RCStickerView.swift */,
+				1308E0DB218C57AB0085CB26 /* Util+Extension.swift */,
 			);
 			name = RCStickerView;
 			path = ../..;
@@ -313,6 +316,11 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0930;
 				LastUpgradeCheck = 0930;
+				TargetAttributes = {
+					0B4EAA4264B2D2946AF03043EECD39AA = {
+						LastSwiftMigration = 1000;
+					};
+				};
 			};
 			buildConfigurationList = 2D8E8EC45A3A1A1D94AE762CB5028504 /* Build configuration list for PBXProject "Pods" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -371,6 +379,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				24BC48843CC7F55B24B243A7936FE502 /* Pods-RCStickerView_Example-dummy.m in Sources */,
+				1308E0DC218C57AB0085CB26 /* Util+Extension.swift in Sources */,
+				1308E0DA218C548C0085CB26 /* RCStickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -379,7 +389,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				59510689BBA92502255030E974631052 /* RCStickerView-dummy.m in Sources */,
-				65A74FFEED5D6C4A15C6903A5578E8ED /* ReplaceMe.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +408,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CC579559C731581DE47B9785EC3AB49B /* Pods-RCStickerView_Example.debug.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -421,6 +431,8 @@
 				PRODUCT_NAME = Pods_RCStickerView_Example;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -431,6 +443,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3FDD486CE26B8F9F74AD54B50CFC6DE7 /* Pods-RCStickerView_Example.release.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -453,6 +466,7 @@
 				PRODUCT_NAME = Pods_RCStickerView_Example;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
