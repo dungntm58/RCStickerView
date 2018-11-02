@@ -186,47 +186,47 @@ open class RCStickerView: UIView {
         }
     }
     
-    open var enableClose: Bool = true {
+    open var isEnableClose: Bool = true {
         didSet {
-            if self.showEditingHandlers {
-                self.closeImageView.isHidden = !enableClose
-                self.closeImageView.isUserInteractionEnabled = enableClose
+            if self.shouldShowEditingHandlers {
+                self.closeImageView.isHidden = !isEnableClose
+                self.closeImageView.isUserInteractionEnabled = isEnableClose
             }
         }
     }
     
-    open var enableRotate: Bool = true {
+    open var isEnableRotate: Bool = true {
         didSet {
-            if self.showEditingHandlers {
-                self.rotateImageView.isHidden = !enableRotate
-                self.rotateImageView.isUserInteractionEnabled = enableRotate
+            if self.shouldShowEditingHandlers {
+                self.rotateImageView.isHidden = !isEnableRotate
+                self.rotateImageView.isUserInteractionEnabled = isEnableRotate
             }
         }
     }
     
-    open var enableFlip: Bool = true {
+    open var isEnableFlip: Bool = true {
         didSet {
-            if self.showEditingHandlers {
-                self.flipImageView.isHidden = !enableFlip
-                self.flipImageView.isUserInteractionEnabled = enableFlip
+            if self.shouldShowEditingHandlers {
+                self.flipImageView.isHidden = !isEnableFlip
+                self.flipImageView.isUserInteractionEnabled = isEnableFlip
             }
         }
     }
     
-    var showEditingHandlers: Bool = true {
+    var shouldShowEditingHandlers: Bool = true {
         didSet {
-            if showEditingHandlers {
+            if shouldShowEditingHandlers {
                 self.contentView.layer.borderWidth = 2
             } else {
                 self.contentView.layer.borderWidth = 0
             }
             
-            self.closeImageView.isHidden = !enableClose
-            self.closeImageView.isUserInteractionEnabled = enableClose
-            self.rotateImageView.isHidden = !enableRotate
-            self.rotateImageView.isUserInteractionEnabled = enableRotate
-            self.flipImageView.isHidden = !enableFlip
-            self.flipImageView.isUserInteractionEnabled = enableFlip
+            self.closeImageView.isHidden = !isEnableClose
+            self.closeImageView.isUserInteractionEnabled = isEnableClose
+            self.rotateImageView.isHidden = !isEnableRotate
+            self.rotateImageView.isUserInteractionEnabled = isEnableRotate
+            self.flipImageView.isHidden = !isEnableFlip
+            self.flipImageView.isUserInteractionEnabled = isEnableFlip
         }
     }
     
@@ -273,12 +273,12 @@ open class RCStickerView: UIView {
         self.set(position: .bottomLeft, for: .flip)
         self.addSubview(self.flipImageView)
         
-        self.showEditingHandlers = true
-        self.enableClose = true
-        self.enableRotate = true
-        self.enableFlip = true
+        self.shouldShowEditingHandlers = true
+        self.isEnableClose = true
+        self.isEnableRotate = true
+        self.isEnableFlip = true
         
-        self.minimumSize = defaultMinimumSize
+        self._minimumSize = defaultMinimumSize
         self.contentView.layer.borderColor = outlineBorderColor.cgColor
     }
     
@@ -327,7 +327,7 @@ private extension RCStickerView {
             self.transform = CGAffineTransform(rotationAngle: -angleDiff)
             
             var scale = distance(from: center, to: touchLocation) / initialDistance
-            let minimumScale = self.minimumSize / min(initialBounds.width, initialBounds.height)
+            let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
             scale = max(scale, minimumScale)
             self.bounds = initialBounds.scale(w: scale, h: scale)
             self.setNeedsDisplay()
