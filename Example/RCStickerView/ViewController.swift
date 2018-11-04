@@ -13,17 +13,52 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        let testView = UIView(frame: CGRect(x: 0, y: 0, width: 150, height: 100))
+        testView.backgroundColor = .red
+        
+        let stickerView = RCStickerView(contentView: testView)
+        stickerView.center = self.view.center
+        stickerView.delegate = self
+        stickerView.outlineBorderColor = .blue
+        stickerView.set(image: UIImage(named: "Close"), for: .close)
+        stickerView.set(image: UIImage(named: "Rotate"), for: .rotate)
+        stickerView.set(image: UIImage(named: "Flip"), for: .flip)
+        stickerView.handlerSize = 40
+        self.view.addSubview(stickerView)
+        
+        let testLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
+        testLabel.text = "Test Label"
+        testLabel.textAlignment = .center
+        
+        let stickerView2 = RCStickerView(contentView: testLabel)
+        stickerView2.center = CGPoint(x: 100, y: 100)
+        stickerView2.delegate = self
+        stickerView2.set(image: UIImage(named: "Close"), for: .close)
+        stickerView2.set(image: UIImage(named: "Rotate"), for: .rotate)
+        stickerView2.shouldShowEditingHandlers = true
+        self.view.addSubview(stickerView2)
+        
+        self.selectedView = stickerView
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    var selectedView: RCStickerView! {
+        didSet {
+            if oldValue != selectedView {
+                oldValue?.shouldShowEditingHandlers = false
+            }
+            selectedView?.shouldShowEditingHandlers =  true
+        }
     }
-
 }
 
-extension ViewController {
+extension ViewController: RCStickerViewDelegate {
+    func stickerViewDidBeginMoving(_ stickerView: RCStickerView) {
+        self.selectedView = stickerView
+    }
     
+    func stickerViewDidTap(_ stickerView: RCStickerView) {
+        self.selectedView = stickerView
+    }
 }
 

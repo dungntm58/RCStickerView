@@ -29,6 +29,9 @@ public enum RCStickerViewPosition: Int {
     @objc optional func stickerViewDidEndRotating(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidClose(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidTap(_ stickerView: RCStickerView)
+    @objc optional func stickerViewDidBeginZooming(_ stickerView: RCStickerView)
+    @objc optional func stickerViewDidChangeZooming(_ stickerView: RCStickerView)
+    @objc optional func stickerViewDidEndZooming(_ stickerView: RCStickerView)
 }
 
 public class RCStickerView: UIView {
@@ -346,19 +349,19 @@ private extension RCStickerView {
         switch recognizer.state {
         case .began:
             deltaAngle = CGFloat(atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x - self.transform.angle)))
-            initialBounds = self.bounds
-            initialDistance = distance(from: center, to: touchLocation)
+//            initialBounds = self.bounds
+//            initialDistance = distance(from: center, to: touchLocation)
             self.delegate?.stickerViewDidBeginRotating?(self)
         case .changed:
             let angle = atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x))
             let angleDiff = deltaAngle - CGFloat(angle)
             self.transform = CGAffineTransform(rotationAngle: -angleDiff)
             
-            var scale = distance(from: center, to: touchLocation) / initialDistance
-            let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
-            scale = max(scale, minimumScale)
-            self.bounds = initialBounds.scale(w: scale, h: scale)
-            self.setNeedsDisplay()
+//            var scale = distance(from: center, to: touchLocation) / initialDistance
+//            let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
+//            scale = max(scale, minimumScale)
+//            self.bounds = initialBounds.scale(w: scale, h: scale)
+//            self.setNeedsDisplay()
             
             self.delegate?.stickerViewDidChangeRotating?(self)
         case .ended:
@@ -383,22 +386,32 @@ private extension RCStickerView {
         self.delegate?.stickerViewDidTap?(self)
     }
     
-    @objc func handleZoomGesture(_ recognize: UIPinchGestureRecognizer) {
-        switch recognize.state {
+    @objc func handleZoomGesture(_ recognizer: UIPinchGestureRecognizer) {
+        switch recognizer.state {
+        case .began:
+            initialBounds = self.bounds
+            self.delegate?.stickerViewDidBeginZooming?(self)
         case .changed:
-            let pinchCenter = CGPoint(x: recognize.location(in: contentView).x - contentView.bounds.midX,
-                                      y: recognize.location(in: contentView).y - contentView.bounds.midY)
-            let transform = contentView.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
-                .scaledBy(x: recognize.scale, y: recognize.scale)
-                .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
-            contentView.transform = transform
-            recognize.scale = 1
+//            let pinchCenter = CGPoint(x: recognize.location(in: contentView).x - contentView.bounds.midX,
+//                                      y: recognize.location(in: contentView).y - contentView.bounds.midY)
+//            let transform = contentView.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
+//                .scaledBy(x: recognize.scale, y: recognize.scale)
+//                .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
+//            contentView.transform = transform
+//            recognize.scale = 1
+            
+            var scale = recognizer.scale
+            let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
+            scale = max(scale, minimumScale)
+            self.bounds = initialBounds.scale(w: scale, h: scale)
+            self.setNeedsDisplay()
+            
+            self.delegate?.stickerViewDidChangeZooming?(self)
         case .ended:
             // Nice animation to scale down when releasing the pinch.
             // OPTIONAL
-            UIView.animate(withDuration: 0.35) {
-                self.contentView.transform = .identity
-            }
+            self.contentView.transform = .identity
+            self.delegate?.stickerViewDidEndZooming?(self)
         default:
             return
         }

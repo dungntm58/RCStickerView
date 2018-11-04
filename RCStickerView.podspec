@@ -17,7 +17,10 @@ Pod::Spec.new do |s|
 #   * Write the description between the DESC delimiters below.
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
-  s.description      = 'Add label, image, other custom view as a sticker view. You can make fun with a lot of sticker views and gestures attached on them as well like flipping, rotating, zooming.'
+  s.description      = <<-DESC
+  Add label, image, other custom view as a sticker view. You can make fun with a lot of sticker views and gestures attached on them as well like flipping, rotating, zooming.
+                       DESC
+  
 
   s.homepage         = 'https://github.com/dungntm58/RCStickerView'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
@@ -27,14 +30,14 @@ Pod::Spec.new do |s|
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '9.0'
-
-  s.source_files = 'RCStickerView/Classes/*.swift'
+  s.swift_version = '4.0'
+  s.source_files = 'RCStickerView/Classes/**/*'
   
   # s.resource_bundles = {
   #   'RCStickerView' => ['RCStickerView/Assets/*.png']
   # }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
+  # s.frameworks = 'UIKit'
   # s.dependency 'AFNetworking', '~> 2.3'
 end

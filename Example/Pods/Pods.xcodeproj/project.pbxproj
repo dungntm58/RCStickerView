@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		13B9ECC9218F6C1100EC0497 /* RCStickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1308E0D9218C548C0085CB26 /* RCStickerView.swift */; };
+		13B9ECCA218F6C1400EC0497 /* Util+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1308E0DB218C57AB0085CB26 /* Util+Extension.swift */; };
 		24BC48843CC7F55B24B243A7936FE502 /* Pods-RCStickerView_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 9A1E8449AE965C1E558FCA3955593AC0 /* Pods-RCStickerView_Example-dummy.m */; };
 		5913AD63866DEF96C6B7AE8CE797B07E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6DFF15000AFE2A371BF499E7AFDA808 /* Foundation.framework */; };
 		59510689BBA92502255030E974631052 /* RCStickerView-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = AAC9205781DC188EBB9278A95C67B367 /* RCStickerView-dummy.m */; };
@@ -385,6 +387,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				59510689BBA92502255030E974631052 /* RCStickerView-dummy.m in Sources */,
+				13B9ECCA218F6C1400EC0497 /* Util+Extension.swift in Sources */,
+				13B9ECC9218F6C1100EC0497 /* RCStickerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
