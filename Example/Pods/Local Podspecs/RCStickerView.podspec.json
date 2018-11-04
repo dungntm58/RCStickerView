@@ -1,8 +1,8 @@
 {
   "name": "RCStickerView",
   "version": "0.1.0",
-  "summary": "A short description of RCStickerView.",
-  "description": "TODO: Add long description of the pod here.",
+  "summary": "Add label, image, other custom view as a sticker view.",
+  "description": "Add label, image, other custom view as a sticker view. You can make fun with a lot of sticker views and gestures attached on them as well like flipping, rotating, zooming.",
   "homepage": "https://github.com/dungntm58/RCStickerView",
   "license": {
     "type": "MIT",
@@ -16,7 +16,7 @@
     "tag": "0.1.0"
   },
   "platforms": {
-    "ios": "8.0"
+    "ios": "9.0"
   },
   "source_files": "RCStickerView/Classes/**/*"
 }

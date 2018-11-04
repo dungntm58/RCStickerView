@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '9.0'
 
-  s.source_files = 'RCStickerView/Classes/**/*'
+  s.source_files = 'RCStickerView/Classes/*.swift'
   
   # s.resource_bundles = {
   #   'RCStickerView' => ['RCStickerView/Assets/*.png']

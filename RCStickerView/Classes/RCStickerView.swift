@@ -52,7 +52,7 @@ public class RCStickerView: UIView {
     
     private var contentView: UIView!
     
-    @IBOutlet open weak var delegate: RCStickerViewDelegate?
+    @IBOutlet public weak var delegate: RCStickerViewDelegate?
     
     private lazy var moveGesture: UIPanGestureRecognizer = {
         return UIPanGestureRecognizer(target: self, action: #selector(handleMoveGesture(_:)))
@@ -109,7 +109,7 @@ public class RCStickerView: UIView {
         return _flipImageView
     }()
     
-    open func set(image: UIImage?, for handler: RCStickerViewHandler) {
+    public func set(image: UIImage?, for handler: RCStickerViewHandler) {
         switch handler {
         case .close:
             self.closeImageView.image = image
@@ -120,7 +120,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    open func set(position: RCStickerViewPosition, for handler: RCStickerViewHandler) {
+    public func set(position: RCStickerViewPosition, for handler: RCStickerViewHandler) {
         let origin = self.contentView.frame.origin
         let size = self.contentView.frame.size
         let handlerView: UIView
@@ -152,7 +152,7 @@ public class RCStickerView: UIView {
         handlerView.tag = position.rawValue
     }
     
-    open var handlerSize: CGFloat {
+    public var handlerSize: CGFloat {
         set(size) {
             guard size > 0 else {
                 return
@@ -172,7 +172,7 @@ public class RCStickerView: UIView {
             
             self.contentView.center = center
             self.addSubview(self.contentView)
-            self.sendSubviewToBack(self.contentView)
+            self.sendSubview(toBack: self.contentView)
             
             let handlerFrame = CGRect(x: 0, y: 0, width: defaultInset * 2, height: defaultInset * 2)
             self.closeImageView.frame = handlerFrame
@@ -190,7 +190,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    open var isEnableClose: Bool = true {
+    public var isEnableClose: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
                 self.closeImageView.isHidden = !isEnableClose
@@ -199,7 +199,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    open var isEnableRotate: Bool = true {
+    public var isEnableRotate: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
                 self.rotateImageView.isHidden = !isEnableRotate
@@ -208,7 +208,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    open var isEnableFlip: Bool = true {
+    public var isEnableFlip: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
                 self.flipImageView.isHidden = !isEnableFlip
@@ -217,7 +217,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    open var shouldShowEditingHandlers: Bool = true {
+    public var shouldShowEditingHandlers: Bool = true {
         didSet {
             if shouldShowEditingHandlers {
                 self.contentView.layer.borderWidth = 2
@@ -234,7 +234,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    open var minimumSize: CGFloat {
+    public var minimumSize: CGFloat {
         set(size) {
             _minimumSize = max(size, defaultMinimumSize)
         }
@@ -243,7 +243,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    open var outlineBorderColor: UIColor = .brown {
+    public var outlineBorderColor: UIColor = .brown {
         didSet {
             self.contentView.layer.borderColor = outlineBorderColor.cgColor
         }
@@ -272,7 +272,7 @@ public class RCStickerView: UIView {
         super.init(coder: aDecoder)
     }
     
-    open func set(contentView: UIView) {
+    public func set(contentView: UIView) {
         self.contentView?.removeFromSuperview()
         
         self.contentView = contentView
