@@ -49,7 +49,6 @@ public class RCStickerView: UIView {
      *  Variables for rotating and resizing view
      */
     private var initialBounds: CGRect = .zero
-    private var initialDistance: CGFloat = 0
     private var deltaAngle: CGFloat = 0
     private var _minimumSize: CGFloat = 0
     private var _handleSize: CGFloat = 0
@@ -128,7 +127,7 @@ public class RCStickerView: UIView {
         return _flipImageView
     }()
     
-    private lazy var border: CAShapeLayer = {
+    private lazy var dashedLineBorder: CAShapeLayer = {
         let  borderLayer = CAShapeLayer()
         borderLayer.name  = "borderLayer"
         
@@ -286,15 +285,15 @@ public class RCStickerView: UIView {
             if shouldShowEditingHandlers {
                 if self.isDashedLine {
                     self.contentView?.layer.borderWidth = 0
-                    self.contentView?.layer.addSublayer(border)
+                    self.contentView?.layer.addSublayer(dashedLineBorder)
                 }
                 else {
-                    border.removeFromSuperlayer()
+                    dashedLineBorder.removeFromSuperlayer()
                     self.contentView?.layer.borderWidth = 1
                     self.contentView?.layer.borderColor = outlineBorderColor.cgColor
                 }
             } else {
-                border.removeFromSuperlayer()
+                dashedLineBorder.removeFromSuperlayer()
                 self.contentView?.layer.borderWidth = 0
             }
             
@@ -315,10 +314,10 @@ public class RCStickerView: UIView {
     public var isDashedLine: Bool = false {
         didSet {
             if isDashedLine {
-                self.contentView?.layer.addSublayer(border)
+                self.contentView?.layer.addSublayer(dashedLineBorder)
             }
             else {
-                border.removeFromSuperlayer()
+                dashedLineBorder.removeFromSuperlayer()
             }
         }
     }
@@ -334,7 +333,12 @@ public class RCStickerView: UIView {
     
     public var outlineBorderColor: UIColor = .brown {
         didSet {
-            self.contentView.layer.borderColor = outlineBorderColor.cgColor
+            if isDashedLine {
+                self.contentView?.layer.borderColor = outlineBorderColor.cgColor
+            }
+            else {
+                dashedLineBorder.borderColor = outlineBorderColor.cgColor
+            }
         }
     }
     
@@ -366,15 +370,15 @@ public class RCStickerView: UIView {
         
         self.contentView = contentView
         self.contentView.center = center
-        self.contentView.isUserInteractionEnabled = false
+        self.contentView.isUserInteractionEnabled = true
         self.contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.contentView.layer.allowsEdgeAntialiasing = true
         self.addSubview(contentView)
         self.contentView.addGestureRecognizer(self.zoomGesture)
         
         if self.isDashedLine {
-            border.removeFromSuperlayer()
-            self.contentView.layer.addSublayer(border)
+            dashedLineBorder.removeFromSuperlayer()
+            self.contentView.layer.addSublayer(dashedLineBorder)
         }
         else {
             self.contentView.layer.borderWidth = 1
@@ -417,7 +421,7 @@ private extension RCStickerView {
     @objc func handleMoveGesture(_ recognizer: UIPanGestureRecognizer) {
         let touchLocation = recognizer.location(in: self.superview)
         
-        switch (recognizer.state) {
+        switch recognizer.state {
         case .began:
             beginningPoint = touchLocation
             beginningCenter = self.center
@@ -480,13 +484,15 @@ private extension RCStickerView {
     @objc func handleZoomGesture(_ recognizer: UIPinchGestureRecognizer) {
         switch recognizer.state {
         case .began:
-            initialBounds = self.bounds
+            initialBounds = self.contentView.bounds
             self.delegate?.stickerViewDidBeginZooming?(self)
         case .changed:
             var scale = recognizer.scale
             let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
             scale = max(scale, minimumScale)
-            self.bounds = initialBounds.scale(w: scale, h: scale)
+            self.contentView.bounds = initialBounds.scale(w: scale, h: scale)
+            self.bounds = CGRect(x: 0, y: 0, width: contentView.frame.width + defaultInset * 2, height: contentView.frame.height + defaultInset * 2)
+            print(scale, contentView.bounds)
             self.setNeedsDisplay()
             
             self.delegate?.stickerViewDidChangeZooming?(self, scale: scale)
