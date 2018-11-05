@@ -23,7 +23,8 @@ class ViewController: UIViewController {
         stickerView.outlineBorderColor = .blue
         stickerView.set(image: UIImage(named: "Close"), for: .close)
         stickerView.set(image: UIImage(named: "Rotate"), for: .rotate)
-        stickerView.set(image: UIImage(named: "Flip"), for: .flip)
+        stickerView.set(image: UIImage(named: "Flip"), for: .flipX)
+        stickerView.isEnableFlipY = false
         stickerView.handlerSize = 40
         self.view.addSubview(stickerView)
         
@@ -36,6 +37,7 @@ class ViewController: UIViewController {
         stickerView2.delegate = self
         stickerView2.set(image: UIImage(named: "Close"), for: .close)
         stickerView2.set(image: UIImage(named: "Rotate"), for: .rotate)
+        stickerView2.isEnableFlip = false
         stickerView2.shouldShowEditingHandlers = true
         self.view.addSubview(stickerView2)
         

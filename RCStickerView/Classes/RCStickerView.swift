@@ -252,11 +252,22 @@ public class RCStickerView: UIView {
         }
     }
     
+    public var isEnableFlip: Bool = true {
+        didSet {
+            if self.shouldShowEditingHandlers {
+                self.flipXImageView.isHidden = !(isEnableFlipX && isEnableFlip)
+                self.flipXImageView.isUserInteractionEnabled = isEnableFlipX && isEnableFlip
+                self.flipYImageView.isHidden = !(isEnableFlipY && isEnableFlip)
+                self.flipYImageView.isUserInteractionEnabled = isEnableFlipY && isEnableFlip
+            }
+        }
+    }
+    
     public var isEnableFlipX: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
-                self.flipXImageView.isHidden = !isEnableFlipX
-                self.flipXImageView.isUserInteractionEnabled = isEnableFlipX
+                self.flipXImageView.isHidden = !(isEnableFlipX && isEnableFlip)
+                self.flipXImageView.isUserInteractionEnabled = isEnableFlipX && isEnableFlip
             }
         }
     }
@@ -264,8 +275,8 @@ public class RCStickerView: UIView {
     public var isEnableFlipY: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
-                self.flipYImageView.isHidden = !isEnableFlipY
-                self.flipYImageView.isUserInteractionEnabled = isEnableFlipY
+                self.flipYImageView.isHidden = !(isEnableFlipY && isEnableFlip)
+                self.flipYImageView.isUserInteractionEnabled = isEnableFlipY && isEnableFlip
             }
         }
     }
@@ -289,12 +300,15 @@ public class RCStickerView: UIView {
             
             self.closeImageView.isHidden = !isEnableClose
             self.closeImageView.isUserInteractionEnabled = isEnableClose
+            
             self.rotateImageView.isHidden = !isEnableRotate
             self.rotateImageView.isUserInteractionEnabled = isEnableRotate
-            self.flipXImageView.isHidden = !isEnableFlipX
-            self.flipXImageView.isUserInteractionEnabled = isEnableFlipX
-            self.flipYImageView.isHidden = !isEnableFlipY
-            self.flipYImageView.isUserInteractionEnabled = isEnableFlipY
+            
+            self.flipXImageView.isHidden = !(isEnableFlipX && isEnableFlip)
+            self.flipXImageView.isUserInteractionEnabled = isEnableFlipX && isEnableFlip
+            
+            self.flipYImageView.isHidden = !(isEnableFlipY && isEnableFlip)
+            self.flipYImageView.isUserInteractionEnabled = isEnableFlipY && isEnableFlip
         }
     }
     
