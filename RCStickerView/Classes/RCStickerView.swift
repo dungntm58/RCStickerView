@@ -139,6 +139,7 @@ public class RCStickerView: UIView {
         borderLayer.lineWidth = 1
         borderLayer.lineJoin = kCALineJoinRound
         borderLayer.lineDashPattern = [NSNumber(value: 8), NSNumber(value: 4)]
+        borderLayer.allowsEdgeAntialiasing = true
         
         let path = UIBezierPath.init(roundedRect: contentView?.frame ?? .zero, cornerRadius: 0)
         borderLayer.path = path.cgPath
@@ -277,10 +278,12 @@ public class RCStickerView: UIView {
                     self.contentView?.layer.addSublayer(border)
                 }
                 else {
+                    border.removeFromSuperlayer()
                     self.contentView?.layer.borderWidth = 1
                     self.contentView?.layer.borderColor = outlineBorderColor.cgColor
                 }
             } else {
+                border.removeFromSuperlayer()
                 self.contentView?.layer.borderWidth = 0
             }
             
@@ -356,9 +359,11 @@ public class RCStickerView: UIView {
         self.contentView.addGestureRecognizer(self.zoomGesture)
         
         if self.isDashedLine {
+            border.removeFromSuperlayer()
             self.contentView.layer.addSublayer(border)
         }
         else {
+            self.contentView.layer.borderWidth = 1
             self.contentView.layer.borderColor = outlineBorderColor.cgColor
         }
     }
