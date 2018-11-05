@@ -201,8 +201,7 @@ public class RCStickerView: UIView {
             
             defaultInset = round(size / 2)
             defaultMinimumSize = 4 * defaultInset
-//            self._minimumSize = MAX(self.minimumSize, defaultMinimumSize)
-            
+
             let originalCenter = self.center
             let originalTransform = self.transform
             let frame = CGRect(x: 0, y: 0, width: self.contentView.frame.width + defaultInset * 2, height: self.contentView.frame.height + defaultInset * 2)
@@ -374,7 +373,6 @@ public class RCStickerView: UIView {
         self.contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.contentView.layer.allowsEdgeAntialiasing = true
         self.addSubview(contentView)
-        self.contentView.addGestureRecognizer(self.zoomGesture)
         
         if self.isDashedLine {
             dashedLineBorder.removeFromSuperlayer()
@@ -391,6 +389,7 @@ private extension RCStickerView {
     func addGestures() {
         addGestureRecognizer(self.moveGesture)
         addGestureRecognizer(self.tapGesture)
+        addGestureRecognizer(self.zoomGesture)
     }
     
     func initView() {
@@ -484,20 +483,20 @@ private extension RCStickerView {
     @objc func handleZoomGesture(_ recognizer: UIPinchGestureRecognizer) {
         switch recognizer.state {
         case .began:
-            initialBounds = self.contentView.bounds
+            initialBounds = self.bounds
+            recognizer.scale = 1
             self.delegate?.stickerViewDidBeginZooming?(self)
         case .changed:
             var scale = recognizer.scale
             let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
             scale = max(scale, minimumScale)
-            self.contentView.bounds = initialBounds.scale(w: scale, h: scale)
-            self.bounds = CGRect(x: 0, y: 0, width: contentView.frame.width + defaultInset * 2, height: contentView.frame.height + defaultInset * 2)
-            print(scale, contentView.bounds)
+            self.bounds = initialBounds.scale(w: scale, h: scale)
+            self.contentView.bounds = CGRect(x: defaultInset, y: defaultInset, width: frame.width - defaultInset * 2, height: frame.height - defaultInset * 2)
             self.setNeedsDisplay()
             
             self.delegate?.stickerViewDidChangeZooming?(self, scale: scale)
         case .ended:
-            self.contentView.transform = .identity
+            self.transform = .identity
             self.delegate?.stickerViewDidEndZooming?(self)
         default:
             return
