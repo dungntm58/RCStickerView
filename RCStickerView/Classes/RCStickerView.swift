@@ -10,7 +10,8 @@ import UIKit
 public enum RCStickerViewHandler {
     case close
     case rotate
-    case flip
+    case flipX
+    case flipY
 }
 
 public enum RCStickerViewPosition: Int {
@@ -25,12 +26,12 @@ public enum RCStickerViewPosition: Int {
     @objc optional func stickerViewDidChangeMoving(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidEndMoving(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidBeginRotating(_ stickerView: RCStickerView)
-    @objc optional func stickerViewDidChangeRotating(_ stickerView: RCStickerView)
+    @objc optional func stickerViewDidChangeRotating(_ stickerView: RCStickerView, angle: CGFloat)
     @objc optional func stickerViewDidEndRotating(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidClose(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidTap(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidBeginZooming(_ stickerView: RCStickerView)
-    @objc optional func stickerViewDidChangeZooming(_ stickerView: RCStickerView)
+    @objc optional func stickerViewDidChangeZooming(_ stickerView: RCStickerView, scale: CGFloat)
     @objc optional func stickerViewDidEndZooming(_ stickerView: RCStickerView)
 }
 
@@ -71,8 +72,14 @@ public class RCStickerView: UIView {
         return _closeGesture
     }()
     
-    private lazy var flipGesture: UITapGestureRecognizer = {
-        let _flipGesture = UITapGestureRecognizer(target: self, action: #selector(handleFlipGesture(_:)))
+    private lazy var flipXGesture: UITapGestureRecognizer = {
+        let _flipGesture = UITapGestureRecognizer(target: self, action: #selector(handleFlipXGesture(_:)))
+        _flipGesture.delegate = self
+        return _flipGesture
+    }()
+    
+    private lazy var flipYGesture: UITapGestureRecognizer = {
+        let _flipGesture = UITapGestureRecognizer(target: self, action: #selector(handleFlipYGesture(_:)))
         _flipGesture.delegate = self
         return _flipGesture
     }()
@@ -103,13 +110,40 @@ public class RCStickerView: UIView {
         return _rotateImageView
     }()
     
-    private lazy var flipImageView: UIImageView = {
+    private lazy var flipXImageView: UIImageView = {
         let _flipImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: defaultInset * 2, height: defaultInset * 2))
         _flipImageView.contentMode = .scaleAspectFit
         _flipImageView.backgroundColor = .clear
         _flipImageView.isUserInteractionEnabled = true
-        _flipImageView.addGestureRecognizer(self.flipGesture)
+        _flipImageView.addGestureRecognizer(self.flipXGesture)
         return _flipImageView
+    }()
+    
+    private lazy var flipYImageView: UIImageView = {
+        let _flipImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: defaultInset * 2, height: defaultInset * 2))
+        _flipImageView.contentMode = .scaleAspectFit
+        _flipImageView.backgroundColor = .clear
+        _flipImageView.isUserInteractionEnabled = true
+        _flipImageView.addGestureRecognizer(self.flipYGesture)
+        return _flipImageView
+    }()
+    
+    private lazy var border: CAShapeLayer = {
+        let  borderLayer = CAShapeLayer()
+        borderLayer.name  = "borderLayer"
+        
+        borderLayer.bounds = contentView?.bounds ?? .zero
+        borderLayer.position = CGPoint(x: frame.width / 2, y: frame.height / 2)
+        borderLayer.fillColor = UIColor.clear.cgColor
+        borderLayer.strokeColor = outlineBorderColor.cgColor
+        borderLayer.lineWidth = 1
+        borderLayer.lineJoin = kCALineJoinRound
+        borderLayer.lineDashPattern = [NSNumber(value: 8), NSNumber(value: 4)]
+        
+        let path = UIBezierPath.init(roundedRect: contentView?.frame ?? .zero, cornerRadius: 0)
+        borderLayer.path = path.cgPath
+        
+        return borderLayer
     }()
     
     public func set(image: UIImage?, for handler: RCStickerViewHandler) {
@@ -118,8 +152,10 @@ public class RCStickerView: UIView {
             self.closeImageView.image = image
         case .rotate:
             self.rotateImageView.image = image
-        case .flip:
-            self.flipImageView.image = image
+        case .flipX:
+            self.flipXImageView.image = image
+        case .flipY:
+            self.flipYImageView.image = image
         }
     }
     
@@ -133,8 +169,10 @@ public class RCStickerView: UIView {
             handlerView = self.closeImageView
         case .rotate:
             handlerView = self.rotateImageView
-        case .flip:
-            handlerView = self.flipImageView
+        case .flipX:
+            handlerView = self.flipXImageView
+        case .flipY:
+            handlerView = self.flipYImageView
         }
         
         switch position {
@@ -182,8 +220,10 @@ public class RCStickerView: UIView {
             self.set(position: .topRight, for: .close)
             self.rotateImageView.frame = handlerFrame
             self.set(position: .topLeft, for: .rotate)
-            self.flipImageView.frame = handlerFrame
-            self.set(position: .bottomRight, for: .flip)
+            self.flipXImageView.frame = handlerFrame
+            self.set(position: .bottomLeft, for: .flipX)
+            self.flipYImageView.frame = handlerFrame
+            self.set(position: .bottomRight, for: .flipY)
             
             self.center = originalCenter
             self.transform = originalTransform
@@ -211,11 +251,20 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var isEnableFlip: Bool = true {
+    public var isEnableFlipX: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
-                self.flipImageView.isHidden = !isEnableFlip
-                self.flipImageView.isUserInteractionEnabled = isEnableFlip
+                self.flipXImageView.isHidden = !isEnableFlipX
+                self.flipXImageView.isUserInteractionEnabled = isEnableFlipX
+            }
+        }
+    }
+    
+    public var isEnableFlipY: Bool = true {
+        didSet {
+            if self.shouldShowEditingHandlers {
+                self.flipYImageView.isHidden = !isEnableFlipY
+                self.flipYImageView.isUserInteractionEnabled = isEnableFlipY
             }
         }
     }
@@ -223,17 +272,37 @@ public class RCStickerView: UIView {
     public var shouldShowEditingHandlers: Bool = true {
         didSet {
             if shouldShowEditingHandlers {
-                self.contentView.layer.borderWidth = 2
+                if self.isDashedLine {
+                    self.contentView?.layer.borderWidth = 0
+                    self.contentView?.layer.addSublayer(border)
+                }
+                else {
+                    self.contentView?.layer.borderWidth = 1
+                    self.contentView?.layer.borderColor = outlineBorderColor.cgColor
+                }
             } else {
-                self.contentView.layer.borderWidth = 0
+                self.contentView?.layer.borderWidth = 0
             }
             
             self.closeImageView.isHidden = !isEnableClose
             self.closeImageView.isUserInteractionEnabled = isEnableClose
             self.rotateImageView.isHidden = !isEnableRotate
             self.rotateImageView.isUserInteractionEnabled = isEnableRotate
-            self.flipImageView.isHidden = !isEnableFlip
-            self.flipImageView.isUserInteractionEnabled = isEnableFlip
+            self.flipXImageView.isHidden = !isEnableFlipX
+            self.flipXImageView.isUserInteractionEnabled = isEnableFlipX
+            self.flipYImageView.isHidden = !isEnableFlipY
+            self.flipYImageView.isUserInteractionEnabled = isEnableFlipY
+        }
+    }
+    
+    public var isDashedLine: Bool = false {
+        didSet {
+            if isDashedLine {
+                self.contentView?.layer.addSublayer(border)
+            }
+            else {
+                border.removeFromSuperlayer()
+            }
         }
     }
     
@@ -284,8 +353,14 @@ public class RCStickerView: UIView {
         self.contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.contentView.layer.allowsEdgeAntialiasing = true
         self.addSubview(contentView)
+        self.contentView.addGestureRecognizer(self.zoomGesture)
         
-        self.contentView.layer.borderColor = outlineBorderColor.cgColor
+        if self.isDashedLine {
+            self.contentView.layer.addSublayer(border)
+        }
+        else {
+            self.contentView.layer.borderColor = outlineBorderColor.cgColor
+        }
     }
 }
 
@@ -293,7 +368,6 @@ private extension RCStickerView {
     func addGestures() {
         addGestureRecognizer(self.moveGesture)
         addGestureRecognizer(self.tapGesture)
-        addGestureRecognizer(self.zoomGesture)
     }
     
     func initView() {
@@ -305,21 +379,21 @@ private extension RCStickerView {
         self.addSubview(self.closeImageView)
         self.set(position: .topRight, for: .rotate)
         self.addSubview(self.rotateImageView)
-        self.set(position: .bottomLeft, for: .flip)
-        self.addSubview(self.flipImageView)
+        self.set(position: .bottomLeft, for: .flipX)
+        self.addSubview(self.flipXImageView)
+        self.set(position: .bottomRight, for: .flipY)
+        self.addSubview(self.flipYImageView)
         
         self.shouldShowEditingHandlers = true
         self.isEnableClose = true
         self.isEnableRotate = true
-        self.isEnableFlip = true
+        self.isEnableFlipX = true
+        self.isEnableFlipY = true
         
         self._minimumSize = defaultMinimumSize
     }
-}
-
-// MARK: - Gesture Handlers
-
-private extension RCStickerView {
+    
+    // MARK: - Gesture Handlers
     
     @objc func handleMoveGesture(_ recognizer: UIPanGestureRecognizer) {
         let touchLocation = recognizer.location(in: self.superview)
@@ -349,21 +423,13 @@ private extension RCStickerView {
         switch recognizer.state {
         case .began:
             deltaAngle = CGFloat(atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x - self.transform.angle)))
-//            initialBounds = self.bounds
-//            initialDistance = distance(from: center, to: touchLocation)
             self.delegate?.stickerViewDidBeginRotating?(self)
         case .changed:
             let angle = atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x))
             let angleDiff = deltaAngle - CGFloat(angle)
             self.transform = CGAffineTransform(rotationAngle: -angleDiff)
             
-//            var scale = distance(from: center, to: touchLocation) / initialDistance
-//            let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
-//            scale = max(scale, minimumScale)
-//            self.bounds = initialBounds.scale(w: scale, h: scale)
-//            self.setNeedsDisplay()
-            
-            self.delegate?.stickerViewDidChangeRotating?(self)
+            self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle))
         case .ended:
             self.delegate?.stickerViewDidEndRotating?(self)
         default:
@@ -376,9 +442,15 @@ private extension RCStickerView {
         self.delegate?.stickerViewDidClose?(self)
     }
     
-    @objc func handleFlipGesture(_ recognizer: UITapGestureRecognizer) {
+    @objc func handleFlipXGesture(_ recognizer: UITapGestureRecognizer) {
         UIView.animate(withDuration: 0.35) {
-            self.contentView.transform = CGAffineTransform(scaleX: -1, y: 1)
+            self.contentView?.transform = CGAffineTransform(scaleX: -1, y: 1)
+        }
+    }
+    
+    @objc func handleFlipYGesture(_ recognizer: UITapGestureRecognizer) {
+        UIView.animate(withDuration: 0.35) {
+            self.contentView?.transform = CGAffineTransform(scaleX: 1, y: -1)
         }
     }
     
@@ -392,24 +464,14 @@ private extension RCStickerView {
             initialBounds = self.bounds
             self.delegate?.stickerViewDidBeginZooming?(self)
         case .changed:
-//            let pinchCenter = CGPoint(x: recognize.location(in: contentView).x - contentView.bounds.midX,
-//                                      y: recognize.location(in: contentView).y - contentView.bounds.midY)
-//            let transform = contentView.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
-//                .scaledBy(x: recognize.scale, y: recognize.scale)
-//                .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
-//            contentView.transform = transform
-//            recognize.scale = 1
-            
             var scale = recognizer.scale
             let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
             scale = max(scale, minimumScale)
             self.bounds = initialBounds.scale(w: scale, h: scale)
             self.setNeedsDisplay()
             
-            self.delegate?.stickerViewDidChangeZooming?(self)
+            self.delegate?.stickerViewDidChangeZooming?(self, scale: scale)
         case .ended:
-            // Nice animation to scale down when releasing the pinch.
-            // OPTIONAL
             self.contentView.transform = .identity
             self.delegate?.stickerViewDidEndZooming?(self)
         default:
@@ -419,7 +481,7 @@ private extension RCStickerView {
 }
 
 extension RCStickerView: UIGestureRecognizerDelegate {
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
 }
