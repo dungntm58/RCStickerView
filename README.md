@@ -40,7 +40,7 @@ RCStickerView is heavily inspired by CHTStickerView.
 
 ## Author
 
-dungntm58, minhdung.uet.work@gmail.com
+RobertNguyen, minhdung.uet.work@gmail.com
 
 ## License
 
