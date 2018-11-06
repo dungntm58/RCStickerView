@@ -32,6 +32,26 @@ $ pod install
 
 ## Usage
 
+See the `Example` project for more details.
+```swift
+override func viewDidLoad() {
+  super.viewDidLoad()
+  
+  let testView = UIView(frame: CGRect(x: 0, y: 0, width: 150, height: 100))
+  testView.backgroundColor = .red
+  
+  let stickerView = RCStickerView(contentView: testView)
+  stickerView.center = self.view.center
+  stickerView.delegate = self
+  stickerView.outlineBorderColor = .blue
+  stickerView.set(image: UIImage(named: "Close"), for: .close)
+  stickerView.set(image: UIImage(named: "Rotate"), for: .rotate)
+  stickerView.set(image: UIImage(named: "Flip"), for: .flipX)
+  stickerView.isEnableFlipY = false
+  stickerView.handlerSize = 40
+  self.view.addSubview(stickerView)
+}
+```
 
 
 ## Inspiration

@@ -279,6 +279,19 @@ public class RCStickerView: UIView {
         }
     }
     
+    public var isEnableZooming: Bool = true {
+        didSet {
+            if isEnableZooming {
+                if !(self.gestureRecognizers?.contains(zoomGesture) ?? false) {
+                    self.addGestureRecognizer(zoomGesture)
+                }
+            }
+            else {
+                self.removeGestureRecognizer(zoomGesture)
+            }
+        }
+    }
+    
     public var shouldShowEditingHandlers: Bool = true {
         didSet {
             if shouldShowEditingHandlers {
