@@ -35,7 +35,8 @@ public enum RCStickerViewPosition: Int {
     @objc optional func stickerViewDidEndZooming(_ stickerView: RCStickerView)
 }
 
-public class RCStickerView: UIView {
+@IBDesignable
+open class RCStickerView: UIView {
     private var defaultInset: CGFloat = 0
     private var defaultMinimumSize: CGFloat = 0
     
@@ -55,7 +56,7 @@ public class RCStickerView: UIView {
     
     private var contentView: UIView!
     
-    @IBOutlet public weak var delegate: RCStickerViewDelegate?
+    @IBOutlet open weak var delegate: RCStickerViewDelegate?
     
     private lazy var moveGesture: UIPanGestureRecognizer = {
         return UIPanGestureRecognizer(target: self, action: #selector(handleMoveGesture(_:)))
@@ -146,7 +147,7 @@ public class RCStickerView: UIView {
         return borderLayer
     }()
     
-    public func set(image: UIImage?, for handler: RCStickerViewHandler) {
+    open func set(image: UIImage?, for handler: RCStickerViewHandler) {
         switch handler {
         case .close:
             self.closeImageView.image = image
@@ -159,7 +160,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public func set(position: RCStickerViewPosition, for handler: RCStickerViewHandler) {
+    open func set(position: RCStickerViewPosition, for handler: RCStickerViewHandler) {
         let origin = self.contentView.frame.origin
         let size = self.contentView.frame.size
         let handlerView: UIView
@@ -193,7 +194,7 @@ public class RCStickerView: UIView {
         handlerView.tag = position.rawValue
     }
     
-    public var handlerSize: CGFloat {
+    open var handlerSize: CGFloat {
         set(size) {
             guard size > 0 else {
                 return
@@ -232,7 +233,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var isEnableClose: Bool = true {
+    open var isEnableClose: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
                 self.closeImageView.isHidden = !isEnableClose
@@ -241,7 +242,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var isEnableRotate: Bool = true {
+    open var isEnableRotate: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
                 self.rotateImageView.isHidden = !isEnableRotate
@@ -250,7 +251,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var isEnableFlip: Bool = true {
+    open var isEnableFlip: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
                 self.flipXImageView.isHidden = !(isEnableFlipX && isEnableFlip)
@@ -261,7 +262,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var isEnableFlipX: Bool = true {
+    open var isEnableFlipX: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
                 self.flipXImageView.isHidden = !(isEnableFlipX && isEnableFlip)
@@ -270,7 +271,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var isEnableFlipY: Bool = true {
+    open var isEnableFlipY: Bool = true {
         didSet {
             if self.shouldShowEditingHandlers {
                 self.flipYImageView.isHidden = !(isEnableFlipY && isEnableFlip)
@@ -279,7 +280,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var isEnableZooming: Bool = true {
+    open var isEnableZooming: Bool = true {
         didSet {
             if isEnableZooming {
                 if !(self.gestureRecognizers?.contains(zoomGesture) ?? false) {
@@ -292,7 +293,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var shouldShowEditingHandlers: Bool = true {
+    open var shouldShowEditingHandlers: Bool = true {
         didSet {
             if shouldShowEditingHandlers {
                 if self.isDashedLine {
@@ -323,7 +324,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var isDashedLine: Bool = false {
+    open var isDashedLine: Bool = false {
         didSet {
             if isDashedLine {
                 self.contentView?.layer.addSublayer(dashedLineBorder)
@@ -334,7 +335,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var minimumSize: CGFloat {
+    open var minimumSize: CGFloat {
         set(size) {
             _minimumSize = max(size, defaultMinimumSize)
         }
@@ -343,7 +344,7 @@ public class RCStickerView: UIView {
         }
     }
     
-    public var outlineBorderColor: UIColor = .brown {
+    open var outlineBorderColor: UIColor = .brown {
         didSet {
             if isDashedLine {
                 self.contentView?.layer.borderColor = outlineBorderColor.cgColor
@@ -377,7 +378,7 @@ public class RCStickerView: UIView {
         super.init(coder: aDecoder)
     }
     
-    public func set(contentView: UIView) {
+    open func set(contentView: UIView) {
         self.contentView?.removeFromSuperview()
         
         self.contentView = contentView
