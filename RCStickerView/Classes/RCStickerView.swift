@@ -21,6 +21,12 @@ public enum RCStickerViewPosition: Int {
     case bottomRight
 }
 
+public enum MovingMode {
+    case free
+    case insideSuperview
+    case inside(view: UIView)
+}
+
 @objc public protocol RCStickerViewDelegate: class {
     @objc optional func stickerViewDidBeginMoving(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidChangeMoving(_ stickerView: RCStickerView)
@@ -148,6 +154,8 @@ open class RCStickerView: UIView {
     // MARK: - Public
     
     @IBOutlet public weak var delegate: RCStickerViewDelegate?
+    
+    public var movingMode: MovingMode = .free
     
     public func set(image: UIImage?, for handler: RCStickerViewHandler) {
         switch handler {
@@ -434,24 +442,90 @@ private extension RCStickerView {
     // MARK: - Gesture Handlers
     
     @objc func handleMoveGesture(_ recognizer: UIPanGestureRecognizer) {
-        let touchLocation = recognizer.location(in: self.superview)
-        
         switch recognizer.state {
         case .began:
-            beginningPoint = touchLocation
-            beginningCenter = self.center
+            onBeginMoving(recognizer)
             self.delegate?.stickerViewDidBeginMoving?(self)
         case .changed:
-            self.center = CGPoint(x: beginningCenter.x + (touchLocation.x - beginningPoint.x),
-                                  y: beginningCenter.y + (touchLocation.y - beginningPoint.y))
+            onMoving(recognizer)
             self.delegate?.stickerViewDidChangeMoving?(self)
         case .ended:
-            self.center = CGPoint(x: beginningCenter.x + (touchLocation.x - beginningPoint.x),
-                                  y: beginningCenter.y + (touchLocation.y - beginningPoint.y))
+            onMoving(recognizer)
             self.delegate?.stickerViewDidEndMoving?(self)
         default:
             break
         }
+    }
+    
+    private func onBeginMoving(_ recognizer: UIPanGestureRecognizer) {
+        var touchLocation: CGPoint
+        switch movingMode {
+        case .free, .insideSuperview:
+            touchLocation = recognizer.location(in: self.superview)
+        case .inside(let view):
+            touchLocation = recognizer.location(in: view)
+        }
+        
+        beginningPoint = touchLocation
+        beginningCenter = self.center
+    }
+    
+    private func onMoving(_ recognizer: UIPanGestureRecognizer) {
+        var touchLocation: CGPoint
+        var x: CGFloat
+        var y: CGFloat
+        
+        switch movingMode {
+        case .free:
+            touchLocation = recognizer.location(in: self.superview)
+            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
+            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+        case .insideSuperview:
+            touchLocation = recognizer.location(in: self.superview)
+            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
+            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+            
+            if x < frame.width / 2 {
+                x = frame.width / 2
+            }
+            
+            if y < frame.height / 2 {
+                y = frame.height / 2
+            }
+            
+            let superview = self.superview ?? self.window
+            if let superview = superview {
+                if x > superview.frame.width - frame.width / 2 {
+                    x = superview.frame.width - frame.width / 2
+                }
+                
+                if y > superview.frame.height - frame.height / 2 {
+                    y = superview.frame.height - frame.height / 2
+                }
+            }
+        case .inside(let view):
+            touchLocation = recognizer.location(in: view)
+            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
+            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+            
+            if x < frame.width / 2 {
+                x = frame.width / 2
+            }
+            
+            if y < frame.height / 2 {
+                y = frame.height / 2
+            }
+            
+            if x > view.frame.width - frame.width / 2 {
+                x = view.frame.width - frame.width / 2
+            }
+            
+            if y > view.frame.height - frame.height / 2 {
+                y = view.frame.height - frame.height / 2
+            }
+        }
+        
+        self.center = CGPoint(x: x, y: y)
     }
     
     @objc func handleRotateGesture(_ recognizer: UIPanGestureRecognizer) {
