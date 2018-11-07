@@ -26,6 +26,8 @@ class ViewController: UIViewController {
         stickerView.set(image: UIImage(named: "Flip"), for: .flipX)
         stickerView.isEnableFlipY = false
         stickerView.handlerSize = 40
+        stickerView.movingMode = .insideSuperview(ignoreHandler: true)
+        
         self.view.addSubview(stickerView)
         
         let testLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))

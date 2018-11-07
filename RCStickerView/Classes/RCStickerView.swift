@@ -23,8 +23,8 @@ public enum RCStickerViewPosition: Int {
 
 public enum MovingMode {
     case free
-    case insideSuperview
-    case inside(view: UIView)
+    case insideSuperview(ignoreHandler: Bool)
+    case inside(view: UIView, ignoreHandler: Bool)
 }
 
 @objc public protocol RCStickerViewDelegate: class {
@@ -61,6 +61,9 @@ open class RCStickerView: UIView {
     private var _handleSize: CGFloat = 0
     
     private var contentView: UIView!
+    
+    private var positionHandlerMap: [RCStickerViewPosition: RCStickerViewHandler] = [:]
+    private var positionVisibilityMap: [RCStickerViewPosition: Bool] = [:]
     
     private lazy var moveGesture: UIPanGestureRecognizer = {
         return UIPanGestureRecognizer(target: self, action: #selector(handleMoveGesture(_:)))
@@ -168,6 +171,13 @@ open class RCStickerView: UIView {
         case .flipY:
             self.flipYImageView.image = image
         }
+        
+        for (key, value) in positionHandlerMap {
+            if value == handler {
+                positionVisibilityMap[key] = image != nil
+                break
+            }
+        }
     }
     
     public func set(position: RCStickerViewPosition, for handler: RCStickerViewHandler) {
@@ -184,6 +194,15 @@ open class RCStickerView: UIView {
             handlerView = self.flipXImageView
         case .flipY:
             handlerView = self.flipYImageView
+        }
+        
+        let previousMap = self.positionHandlerMap
+        self.positionHandlerMap.removeAll()
+        positionHandlerMap[position] = handler
+        for (key, value) in previousMap {
+            if key != position {
+                positionHandlerMap[key] = value
+            }
         }
         
         switch position {
@@ -370,18 +389,22 @@ open class RCStickerView: UIView {
     public init(contentView: UIView) {
         defaultInset = 11
         defaultMinimumSize = 4 * defaultInset
+        _handleSize = 2 * defaultInset
         
         let frame = CGRect(x: 0, y: 0, width: contentView.frame.width + defaultInset * 2, height: contentView.frame.height + defaultInset * 2)
         super.init(frame: frame)
         set(contentView: contentView)
         initView()
+        
+        positionVisibilityMap[.topLeft] = false
+        positionVisibilityMap[.topRight] = false
+        positionVisibilityMap[.bottomLeft] = false
+        positionVisibilityMap[.bottomRight] = false
     }
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        defaultInset = 11
-        defaultMinimumSize = 4 * defaultInset
-        initView()
+        commonInit()
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -439,6 +462,18 @@ private extension RCStickerView {
         self._minimumSize = defaultMinimumSize
     }
     
+    func commonInit() {
+        defaultInset = 11
+        defaultMinimumSize = 4 * defaultInset
+        _handleSize = 2 * defaultInset
+        initView()
+        
+        positionVisibilityMap[.topLeft] = false
+        positionVisibilityMap[.topRight] = false
+        positionVisibilityMap[.bottomLeft] = false
+        positionVisibilityMap[.bottomRight] = false
+    }
+    
     // MARK: - Gesture Handlers
     
     @objc func handleMoveGesture(_ recognizer: UIPanGestureRecognizer) {
@@ -460,9 +495,9 @@ private extension RCStickerView {
     private func onBeginMoving(_ recognizer: UIPanGestureRecognizer) {
         var touchLocation: CGPoint
         switch movingMode {
-        case .free, .insideSuperview:
+        case .free, .insideSuperview(_):
             touchLocation = recognizer.location(in: self.superview)
-        case .inside(let view):
+        case .inside(let view, _):
             touchLocation = recognizer.location(in: view)
         }
         
@@ -480,48 +515,86 @@ private extension RCStickerView {
             touchLocation = recognizer.location(in: self.superview)
             x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
             y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
-        case .insideSuperview:
+        case .insideSuperview(let ignoreHandler):
             touchLocation = recognizer.location(in: self.superview)
             x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
             y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
             
-            if x < frame.width / 2 {
-                x = frame.width / 2
+            var topPadding: CGFloat = 0
+            var leftPadding: CGFloat = 0
+            var rightPadding: CGFloat = 0
+            var bottomPadding: CGFloat = 0
+            if ignoreHandler {
+                if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.topRight]! {
+                    topPadding = _handleSize
+                }
+                if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.bottomLeft]! {
+                    leftPadding = _handleSize
+                }
+                if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.topRight]! {
+                    rightPadding = _handleSize
+                }
+                if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.bottomLeft]! {
+                    bottomPadding = _handleSize
+                }
             }
             
-            if y < frame.height / 2 {
-                y = frame.height / 2
+            if x < frame.width / 2 - leftPadding {
+                x = frame.width / 2 - leftPadding
+            }
+            
+            if y < frame.height / 2 - topPadding {
+                y = frame.height / 2 - topPadding
             }
             
             let superview = self.superview ?? self.window
             if let superview = superview {
-                if x > superview.frame.width - frame.width / 2 {
-                    x = superview.frame.width - frame.width / 2
+                if x > superview.frame.width - frame.width / 2 + rightPadding {
+                    x = superview.frame.width - frame.width / 2 + rightPadding
                 }
                 
-                if y > superview.frame.height - frame.height / 2 {
-                    y = superview.frame.height - frame.height / 2
+                if y > superview.frame.height - frame.height / 2 + bottomPadding {
+                    y = superview.frame.height - frame.height / 2 + bottomPadding
                 }
             }
-        case .inside(let view):
+        case .inside(let view, let ignoreHandler):
             touchLocation = recognizer.location(in: view)
             x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
             y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
             
-            if x < frame.width / 2 {
-                x = frame.width / 2
+            var topPadding: CGFloat = 0
+            var leftPadding: CGFloat = 0
+            var rightPadding: CGFloat = 0
+            var bottomPadding: CGFloat = 0
+            if ignoreHandler {
+                if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.topRight]! {
+                    topPadding = _handleSize
+                }
+                if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.bottomLeft]! {
+                    leftPadding = _handleSize
+                }
+                if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.topRight]! {
+                    rightPadding = _handleSize
+                }
+                if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.bottomLeft]! {
+                    bottomPadding = _handleSize
+                }
             }
             
-            if y < frame.height / 2 {
-                y = frame.height / 2
+            if x < frame.width / 2 - leftPadding {
+                x = frame.width / 2 - leftPadding
             }
             
-            if x > view.frame.width - frame.width / 2 {
-                x = view.frame.width - frame.width / 2
+            if y < frame.height / 2 - topPadding {
+                y = frame.height / 2 - topPadding
             }
             
-            if y > view.frame.height - frame.height / 2 {
-                y = view.frame.height - frame.height / 2
+            if x > view.frame.width - frame.width / 2 + rightPadding {
+                x = view.frame.width - frame.width / 2 + rightPadding
+            }
+            
+            if y > view.frame.height - frame.height / 2 + bottomPadding {
+                y = view.frame.height - frame.height / 2 + bottomPadding
             }
         }
         
