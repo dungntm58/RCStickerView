@@ -145,7 +145,8 @@ open class RCStickerView: UIView {
         let  borderLayer = CAShapeLayer()
         borderLayer.name  = "borderLayer"
         
-        borderLayer.frame = contentView?.frame ?? .zero
+        borderLayer.bounds = contentView?.bounds ?? .zero
+        borderLayer.position = CGPoint(x: (contentView?.frame.width ?? 0) / 2, y: (contentView?.frame.height ?? 0) / 2)
         borderLayer.fillColor = UIColor.clear.cgColor
         borderLayer.strokeColor = outlineBorderColor.cgColor
         borderLayer.lineWidth = 1
@@ -153,7 +154,7 @@ open class RCStickerView: UIView {
         borderLayer.lineDashPattern = [NSNumber(value: 8), NSNumber(value: 4)]
         borderLayer.allowsEdgeAntialiasing = true
         
-        let path = UIBezierPath.init(roundedRect: contentView?.frame ?? .zero, cornerRadius: 0)
+        let path = UIBezierPath.init(roundedRect: contentView?.bounds ?? .zero, cornerRadius: 0)
         borderLayer.path = path.cgPath
         
         return borderLayer
@@ -427,8 +428,13 @@ open class RCStickerView: UIView {
         self.contentView.layer.allowsEdgeAntialiasing = true
         self.addSubview(contentView)
         
-        if !(self.gestureRecognizers?.contains(zoomGesture) ?? false) {
-            addGestureRecognizer(self.zoomGesture)
+        if isEnableZooming {
+            if !(self.gestureRecognizers?.contains(zoomGesture) ?? false) {
+                self.addGestureRecognizer(zoomGesture)
+            }
+        }
+        else {
+            self.removeGestureRecognizer(zoomGesture)
         }
         
         if self.isDashedLine {
@@ -447,7 +453,9 @@ private extension RCStickerView {
         addGestureRecognizer(self.moveGesture)
         addGestureRecognizer(self.tapGesture)
         if contentView != nil {
-            addGestureRecognizer(self.zoomGesture)
+            if !(self.gestureRecognizers?.contains(zoomGesture) ?? false) {
+                self.addGestureRecognizer(zoomGesture)
+            }
         }
     }
     
@@ -659,16 +667,6 @@ private extension RCStickerView {
         switch recognizer.state {
         case .began:
             initialBounds = self.bounds
-            var touchLocation: CGPoint
-            switch zoomMode {
-            case .free, .insideSuperview:
-                touchLocation = recognizer.location(in: self.superview)
-            case .inside(let view):
-                touchLocation = recognizer.location(in: view)
-            }
-            
-            beginningPoint = touchLocation
-            beginningCenter = self.center
             recognizer.scale = 1
             self.delegate?.stickerViewDidBeginZooming?(self)
         case .changed:
@@ -690,8 +688,8 @@ private extension RCStickerView {
             }
             
             self.bounds = expectedBounds
-            self.contentView.bounds = CGRect(x: defaultInset, y: defaultInset, width: frame.width - defaultInset * 2, height: frame.height - defaultInset * 2)
-            self.setNeedsDisplay()
+            self.contentView.frame = CGRect(x: defaultInset, y: defaultInset, width: frame.width - defaultInset * 2, height: frame.height - defaultInset * 2)
+            self.layoutDashedLineBorder()
             
             self.delegate?.stickerViewDidChangeZooming?(self, scale: scale)
         case .ended:
@@ -703,6 +701,14 @@ private extension RCStickerView {
         default:
             return
         }
+    }
+    
+    private func layoutDashedLineBorder() {
+        self.dashedLineBorder.bounds = self.contentView.bounds
+        self.dashedLineBorder.position = CGPoint(x: contentView.frame.width / 2, y: contentView.frame.height / 2)
+        let path = UIBezierPath.init(roundedRect: contentView.bounds, cornerRadius: 0)
+        self.dashedLineBorder.path = path.cgPath
+        self.setNeedsDisplay()
     }
     
     private func calculateFrameWhileZooming(in view: UIView, scale: CGFloat, estimatedFrame: CGRect) -> CGRect {
@@ -724,7 +730,7 @@ private extension RCStickerView {
     }
     
     private func onMoveWhileZooming(_ recognizer: UIPinchGestureRecognizer) {
-        beginningCenter = self.center
+        let beginningCenter = self.center
         var touchLocation: CGPoint
         var x: CGFloat
         var y: CGFloat
@@ -732,12 +738,12 @@ private extension RCStickerView {
         switch zoomMode {
         case .free:
             touchLocation = recognizer.location(in: self.superview)
-            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
-            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+            x = beginningCenter.x + touchLocation.x - touchLocation.x
+            y = beginningCenter.y + touchLocation.y - touchLocation.y
         case .insideSuperview:
             touchLocation = recognizer.location(in: self.superview)
-            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
-            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+            x = beginningCenter.x + touchLocation.x
+            y = beginningCenter.y + touchLocation.y
             
             var topPadding: CGFloat = 0
             var leftPadding: CGFloat = 0
@@ -776,8 +782,8 @@ private extension RCStickerView {
             }
         case .inside(let view):
             touchLocation = recognizer.location(in: view)
-            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
-            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+            x = beginningCenter.x + touchLocation.x
+            y = beginningCenter.y + touchLocation.y
             
             var topPadding: CGFloat = 0
             var leftPadding: CGFloat = 0
