@@ -27,6 +27,12 @@ public enum MovingMode {
     case inside(view: UIView, ignoreHandler: Bool)
 }
 
+public enum ZoomMode {
+    case free
+    case insideSuperview
+    case inside(view: UIView)
+}
+
 @objc public protocol RCStickerViewDelegate: class {
     @objc optional func stickerViewDidBeginMoving(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidChangeMoving(_ stickerView: RCStickerView)
@@ -139,8 +145,7 @@ open class RCStickerView: UIView {
         let  borderLayer = CAShapeLayer()
         borderLayer.name  = "borderLayer"
         
-        borderLayer.bounds = contentView?.bounds ?? .zero
-        borderLayer.position = CGPoint(x: frame.width / 2, y: frame.height / 2)
+        borderLayer.frame = contentView?.frame ?? .zero
         borderLayer.fillColor = UIColor.clear.cgColor
         borderLayer.strokeColor = outlineBorderColor.cgColor
         borderLayer.lineWidth = 1
@@ -159,6 +164,7 @@ open class RCStickerView: UIView {
     @IBOutlet public weak var delegate: RCStickerViewDelegate?
     
     public var movingMode: MovingMode = .free
+    public var zoomMode: ZoomMode = .free
     
     public func set(image: UIImage?, for handler: RCStickerViewHandler) {
         switch handler {
@@ -421,6 +427,10 @@ open class RCStickerView: UIView {
         self.contentView.layer.allowsEdgeAntialiasing = true
         self.addSubview(contentView)
         
+        if !(self.gestureRecognizers?.contains(zoomGesture) ?? false) {
+            addGestureRecognizer(self.zoomGesture)
+        }
+        
         if self.isDashedLine {
             dashedLineBorder.removeFromSuperlayer()
             self.contentView.layer.addSublayer(dashedLineBorder)
@@ -436,7 +446,9 @@ private extension RCStickerView {
     func addGestures() {
         addGestureRecognizer(self.moveGesture)
         addGestureRecognizer(self.tapGesture)
-        addGestureRecognizer(self.zoomGesture)
+        if contentView != nil {
+            addGestureRecognizer(self.zoomGesture)
+        }
     }
     
     func initView() {
@@ -647,23 +659,161 @@ private extension RCStickerView {
         switch recognizer.state {
         case .began:
             initialBounds = self.bounds
+            var touchLocation: CGPoint
+            switch zoomMode {
+            case .free, .insideSuperview:
+                touchLocation = recognizer.location(in: self.superview)
+            case .inside(let view):
+                touchLocation = recognizer.location(in: view)
+            }
+            
+            beginningPoint = touchLocation
+            beginningCenter = self.center
             recognizer.scale = 1
             self.delegate?.stickerViewDidBeginZooming?(self)
         case .changed:
             var scale = recognizer.scale
             let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
             scale = max(scale, minimumScale)
-            self.bounds = initialBounds.scale(w: scale, h: scale)
+            var expectedBounds = initialBounds.scale(w: scale, h: scale)
+            
+            switch zoomMode {
+            case .free:
+                break
+            case .insideSuperview:
+                let view = self.superview ?? self.window
+                if let view = view {
+                    expectedBounds = calculateFrameWhileZooming(in: view, scale: scale, estimatedFrame: expectedBounds)
+                }
+            case .inside(let view):
+                expectedBounds = calculateFrameWhileZooming(in: view, scale: scale, estimatedFrame: expectedBounds)
+            }
+            
+            self.bounds = expectedBounds
             self.contentView.bounds = CGRect(x: defaultInset, y: defaultInset, width: frame.width - defaultInset * 2, height: frame.height - defaultInset * 2)
             self.setNeedsDisplay()
             
             self.delegate?.stickerViewDidChangeZooming?(self, scale: scale)
         case .ended:
             self.transform = .identity
+            UIView.animate(withDuration: 0.35) {
+                self.onMoveWhileZooming(recognizer)
+            }
             self.delegate?.stickerViewDidEndZooming?(self)
         default:
             return
         }
+    }
+    
+    private func calculateFrameWhileZooming(in view: UIView, scale: CGFloat, estimatedFrame: CGRect) -> CGRect {
+        var expectedBounds = estimatedFrame
+        let oldHeight = expectedBounds.height
+        let oldWidth = expectedBounds.width
+        let maxResize = max(oldHeight / view.frame.height, oldWidth / view.frame.width)
+        if oldHeight > view.frame.height && maxResize == oldHeight / view.frame.height {
+            expectedBounds.size.height = view.frame.height
+            expectedBounds.size.width = oldWidth / oldHeight * view.frame.height
+        }
+        
+        if oldWidth > view.frame.width && maxResize == oldWidth / view.frame.width {
+            expectedBounds.size.width = view.frame.width
+            expectedBounds.size.height = oldHeight / oldWidth * view.frame.width
+        }
+        
+        return expectedBounds
+    }
+    
+    private func onMoveWhileZooming(_ recognizer: UIPinchGestureRecognizer) {
+        beginningCenter = self.center
+        var touchLocation: CGPoint
+        var x: CGFloat
+        var y: CGFloat
+        
+        switch zoomMode {
+        case .free:
+            touchLocation = recognizer.location(in: self.superview)
+            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
+            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+        case .insideSuperview:
+            touchLocation = recognizer.location(in: self.superview)
+            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
+            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+            
+            var topPadding: CGFloat = 0
+            var leftPadding: CGFloat = 0
+            var rightPadding: CGFloat = 0
+            var bottomPadding: CGFloat = 0
+            if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.topRight]! {
+                topPadding = _handleSize
+            }
+            if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.bottomLeft]! {
+                leftPadding = _handleSize
+            }
+            if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.topRight]! {
+                rightPadding = _handleSize
+            }
+            if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.bottomLeft]! {
+                bottomPadding = _handleSize
+            }
+            
+            if x < frame.width / 2 - leftPadding {
+                x = frame.width / 2 - leftPadding
+            }
+            
+            if y < frame.height / 2 - topPadding {
+                y = frame.height / 2 - topPadding
+            }
+            
+            let superview = self.superview ?? self.window
+            if let superview = superview {
+                if x > superview.frame.width - frame.width / 2 + rightPadding {
+                    x = superview.frame.width - frame.width / 2 + rightPadding
+                }
+                
+                if y > superview.frame.height - frame.height / 2 + bottomPadding {
+                    y = superview.frame.height - frame.height / 2 + bottomPadding
+                }
+            }
+        case .inside(let view):
+            touchLocation = recognizer.location(in: view)
+            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
+            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+            
+            var topPadding: CGFloat = 0
+            var leftPadding: CGFloat = 0
+            var rightPadding: CGFloat = 0
+            var bottomPadding: CGFloat = 0
+            if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.topRight]! {
+                topPadding = _handleSize - view.frame.origin.y
+            }
+            if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.bottomLeft]! {
+                leftPadding = _handleSize - view.frame.origin.x
+            }
+            if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.topRight]! {
+                rightPadding = _handleSize + view.frame.origin.x
+            }
+            if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.bottomLeft]! {
+                bottomPadding = _handleSize + view.frame.origin.y
+            }
+            
+            if x < frame.width / 2 - leftPadding {
+                x = frame.width / 2 - leftPadding
+            }
+            
+            if y < frame.height / 2 - topPadding {
+                y = frame.height / 2 - topPadding
+            }
+            
+            if x > view.frame.width - frame.width / 2 + rightPadding {
+                x = view.frame.width - frame.width / 2 + rightPadding
+            }
+            
+            if y > view.frame.height - frame.height / 2 + bottomPadding {
+                y = view.frame.height - frame.height / 2 + bottomPadding
+            }
+        }
+        
+        self.center = CGPoint(x: x, y: y)
     }
 }
 

@@ -20,10 +20,9 @@ class ViewController: UIViewController {
         container.center = self.view.center
         
         let testView = UIView(frame: CGRect(x: 0, y: 0, width: 150, height: 100))
-        testView.backgroundColor = .red
+        testView.backgroundColor = .black
         
         let stickerView = RCStickerView(contentView: testView)
-        stickerView.center = container.center
         stickerView.delegate = self
         stickerView.outlineBorderColor = .blue
         stickerView.set(image: UIImage(named: "Close"), for: .close)
@@ -31,7 +30,9 @@ class ViewController: UIViewController {
         stickerView.set(image: UIImage(named: "Flip"), for: .flipX)
         stickerView.isEnableFlipY = false
         stickerView.handlerSize = 40
+        stickerView.isDashedLine = true
         stickerView.movingMode = .insideSuperview(ignoreHandler: true)
+        stickerView.zoomMode = .insideSuperview
         
         container.addSubview(stickerView)
         
