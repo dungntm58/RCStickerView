@@ -14,11 +14,16 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let container = UIView(frame: CGRect(x: 0, y: 0, width: 300, height: 400))
+        self.view.addSubview(container)
+        container.backgroundColor = #colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1)
+        container.center = self.view.center
+        
         let testView = UIView(frame: CGRect(x: 0, y: 0, width: 150, height: 100))
         testView.backgroundColor = .red
         
         let stickerView = RCStickerView(contentView: testView)
-        stickerView.center = self.view.center
+        stickerView.center = container.center
         stickerView.delegate = self
         stickerView.outlineBorderColor = .blue
         stickerView.set(image: UIImage(named: "Close"), for: .close)
@@ -28,7 +33,7 @@ class ViewController: UIViewController {
         stickerView.handlerSize = 40
         stickerView.movingMode = .insideSuperview(ignoreHandler: true)
         
-        self.view.addSubview(stickerView)
+        container.addSubview(stickerView)
         
         let testLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
         testLabel.text = "Test Label"

@@ -568,16 +568,16 @@ private extension RCStickerView {
             var bottomPadding: CGFloat = 0
             if ignoreHandler {
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.topRight]! {
-                    topPadding = _handleSize
+                    topPadding = _handleSize - view.frame.origin.y
                 }
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.bottomLeft]! {
-                    leftPadding = _handleSize
+                    leftPadding = _handleSize - view.frame.origin.x
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.topRight]! {
-                    rightPadding = _handleSize
+                    rightPadding = _handleSize + view.frame.origin.x
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.bottomLeft]! {
-                    bottomPadding = _handleSize
+                    bottomPadding = _handleSize + view.frame.origin.y
                 }
             }
             
