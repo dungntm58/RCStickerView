@@ -447,7 +447,7 @@ open class RCStickerView: UIView {
         }
     }
     
-    func layoutInsideBounds(in view: UIView) {
+    public func layoutInsideBounds(in view: UIView) {
         let frameInSuperview = view.convert(view.bounds, to: self.superview)
         
         var x = self.center.x
