@@ -622,6 +622,8 @@ private extension RCStickerView {
             }
         case .inside(let view, let ignoreHandler):
             touchLocation = recognizer.location(in: view)
+            let frameInSuperview = view.convert(view.bounds, to: self.superview)
+            
             x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
             y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
             
@@ -631,16 +633,16 @@ private extension RCStickerView {
             var bottomPadding: CGFloat = 0
             if ignoreHandler {
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.topRight]! {
-                    topPadding = _handleSize - view.frame.origin.y
+                    topPadding = _handleSize - frameInSuperview.origin.y
                 }
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.bottomLeft]! {
-                    leftPadding = _handleSize - view.frame.origin.x
+                    leftPadding = _handleSize - frameInSuperview.origin.x
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.topRight]! {
-                    rightPadding = _handleSize + view.frame.origin.x
+                    rightPadding = _handleSize + frameInSuperview.origin.x
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.bottomLeft]! {
-                    bottomPadding = _handleSize + view.frame.origin.y
+                    bottomPadding = _handleSize + frameInSuperview.origin.y
                 }
             }
             
@@ -652,12 +654,12 @@ private extension RCStickerView {
                 y = frame.height / 2 - topPadding
             }
             
-            if x > view.frame.width - frame.width / 2 + rightPadding {
-                x = view.frame.width - frame.width / 2 + rightPadding
+            if x > frameInSuperview.width - frame.width / 2 + rightPadding {
+                x = frameInSuperview.width - frame.width / 2 + rightPadding
             }
             
-            if y > view.frame.height - frame.height / 2 + bottomPadding {
-                y = view.frame.height - frame.height / 2 + bottomPadding
+            if y > frameInSuperview.height - frame.height / 2 + bottomPadding {
+                y = frameInSuperview.height - frame.height / 2 + bottomPadding
             }
         }
         

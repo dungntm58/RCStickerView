@@ -23,6 +23,7 @@ class ViewController: UIViewController {
         testView.backgroundColor = .black
         
         let stickerView = RCStickerView(contentView: testView)
+        stickerView.center = self.view.center
         stickerView.delegate = self
         stickerView.outlineBorderColor = .blue
         stickerView.set(image: UIImage(named: "Close"), for: .close)
@@ -31,10 +32,10 @@ class ViewController: UIViewController {
         stickerView.isEnableFlipY = false
         stickerView.handlerSize = 40
         stickerView.isDashedLine = true
-        stickerView.movingMode = .insideSuperview(ignoreHandler: true)
-        stickerView.zoomMode = .insideSuperview
+        stickerView.movingMode = .inside(view: container, ignoreHandler: true)
+        stickerView.zoomMode = .inside(view: container)
         
-        container.addSubview(stickerView)
+        self.view.addSubview(stickerView)
         
         let testLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
         testLabel.text = "Test Label"
