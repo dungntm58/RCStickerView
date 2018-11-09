@@ -203,14 +203,16 @@ open class RCStickerView: UIView {
             handlerView = self.flipYImageView
         }
         
-        let previousMap = self.positionHandlerMap
-        self.positionHandlerMap.removeAll()
-        positionHandlerMap[position] = handler
-        for (key, value) in previousMap {
-            if key != position {
-                positionHandlerMap[key] = value
+        var oldPosition: RCStickerViewPosition = .topLeft
+        for (key, value) in positionHandlerMap {
+            if value == handler {
+                oldPosition = key
             }
         }
+        
+        let oldHandler = positionHandlerMap[position]
+        positionHandlerMap[position] = handler
+        positionHandlerMap[oldPosition] = oldHandler
         
         switch position {
         case .topLeft:
@@ -238,10 +240,11 @@ open class RCStickerView: UIView {
             
             defaultInset = round(size / 2)
             defaultMinimumSize = 4 * defaultInset
+            _handleSize = size
 
             let originalCenter = self.center
             let originalTransform = self.transform
-            let frame = CGRect(x: 0, y: 0, width: self.contentView.frame.width + defaultInset * 2, height: self.contentView.frame.height + defaultInset * 2)
+            let frame = CGRect(x: 0, y: 0, width: self.contentView.frame.width + size, height: self.contentView.frame.height + size)
             
             self.contentView.removeFromSuperview()
             self.transform = .identity
@@ -251,15 +254,16 @@ open class RCStickerView: UIView {
             self.addSubview(self.contentView)
             self.sendSubview(toBack: self.contentView)
             
-            let handlerFrame = CGRect(x: 0, y: 0, width: defaultInset * 2, height: defaultInset * 2)
+            let handlerFrame = CGRect(x: 0, y: 0, width: size, height: size)
             self.closeImageView.frame = handlerFrame
-            self.set(position: .topRight, for: .close)
             self.rotateImageView.frame = handlerFrame
-            self.set(position: .topLeft, for: .rotate)
             self.flipXImageView.frame = handlerFrame
-            self.set(position: .bottomLeft, for: .flipX)
             self.flipYImageView.frame = handlerFrame
-            self.set(position: .bottomRight, for: .flipY)
+            
+            self.set(position: .topLeft, for: positionHandlerMap[.topLeft]!)
+            self.set(position: .topRight, for: positionHandlerMap[.topRight]!)
+            self.set(position: .bottomLeft, for: positionHandlerMap[.bottomLeft]!)
+            self.set(position: .bottomRight, for: positionHandlerMap[.bottomRight]!)
             
             self.center = originalCenter
             self.transform = originalTransform
@@ -363,7 +367,10 @@ open class RCStickerView: UIView {
     public var isDashedLine: Bool = false {
         didSet {
             if isDashedLine {
-                self.contentView?.layer.addSublayer(dashedLineBorder)
+                if dashedLineBorder.superlayer == nil {
+                    self.contentView?.layer.addSublayer(dashedLineBorder)
+                }
+                dashedLineBorder.borderColor = outlineBorderColor.cgColor
             }
             else {
                 dashedLineBorder.removeFromSuperlayer()
@@ -398,15 +405,11 @@ open class RCStickerView: UIView {
         defaultMinimumSize = 4 * defaultInset
         _handleSize = 2 * defaultInset
         
-        let frame = CGRect(x: 0, y: 0, width: contentView.frame.width + defaultInset * 2, height: contentView.frame.height + defaultInset * 2)
+        let frame = CGRect(x: 0, y: 0, width: contentView.frame.width + _handleSize, height: contentView.frame.height + _handleSize)
         super.init(frame: frame)
         set(contentView: contentView)
         initView()
-        
-        positionVisibilityMap[.topLeft] = false
-        positionVisibilityMap[.topRight] = false
-        positionVisibilityMap[.bottomLeft] = false
-        positionVisibilityMap[.bottomRight] = false
+        initMap()
     }
     
     public override init(frame: CGRect) {
@@ -507,14 +510,15 @@ private extension RCStickerView {
         addGestures()
         
         // Setup editing handlers
-        self.set(position: .topLeft, for: .close)
         self.addSubview(self.closeImageView)
-        self.set(position: .topRight, for: .rotate)
         self.addSubview(self.rotateImageView)
-        self.set(position: .bottomLeft, for: .flipX)
         self.addSubview(self.flipXImageView)
-        self.set(position: .bottomRight, for: .flipY)
         self.addSubview(self.flipYImageView)
+        
+        self.set(position: .topLeft, for: .close)
+        self.set(position: .topRight, for: .rotate)
+        self.set(position: .bottomLeft, for: .flipX)
+        self.set(position: .bottomRight, for: .flipY)
         
         self.shouldShowEditingHandlers = true
         self.isEnableClose = true
@@ -530,6 +534,14 @@ private extension RCStickerView {
         defaultMinimumSize = 4 * defaultInset
         _handleSize = 2 * defaultInset
         initView()
+        initMap()
+    }
+    
+    func initMap() {
+        positionHandlerMap[.topLeft] = .close
+        positionHandlerMap[.topRight] = .rotate
+        positionHandlerMap[.bottomLeft] = .flipX
+        positionHandlerMap[.bottomRight] = .flipY
         
         positionVisibilityMap[.topLeft] = false
         positionVisibilityMap[.topRight] = false
@@ -589,16 +601,16 @@ private extension RCStickerView {
             var bottomPadding: CGFloat = 0
             if ignoreHandler {
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.topRight]! {
-                    topPadding = _handleSize
+                    topPadding = _handleSize / 2
                 }
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.bottomLeft]! {
-                    leftPadding = _handleSize
+                    leftPadding = _handleSize / 2
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.topRight]! {
-                    rightPadding = _handleSize
+                    rightPadding = _handleSize / 2
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.bottomLeft]! {
-                    bottomPadding = _handleSize
+                    bottomPadding = _handleSize / 2
                 }
             }
             
@@ -633,16 +645,16 @@ private extension RCStickerView {
             var bottomPadding: CGFloat = 0
             if ignoreHandler {
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.topRight]! {
-                    topPadding = _handleSize - frameInSuperview.origin.y
+                    topPadding = _handleSize / 2 - frameInSuperview.origin.y
                 }
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.bottomLeft]! {
-                    leftPadding = _handleSize - frameInSuperview.origin.x
+                    leftPadding = _handleSize / 2 - frameInSuperview.origin.x
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.topRight]! {
-                    rightPadding = _handleSize + frameInSuperview.origin.x
+                    rightPadding = _handleSize / 2 + frameInSuperview.origin.x
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.bottomLeft]! {
-                    bottomPadding = _handleSize + frameInSuperview.origin.y
+                    bottomPadding = _handleSize / 2 + frameInSuperview.origin.y
                 }
             }
             
@@ -733,7 +745,7 @@ private extension RCStickerView {
             }
             
             self.bounds = expectedBounds
-            self.contentView.frame = CGRect(x: defaultInset, y: defaultInset, width: frame.width - defaultInset * 2, height: frame.height - defaultInset * 2)
+            self.contentView.frame = CGRect(x: defaultInset, y: defaultInset, width: frame.width - _handleSize, height: frame.height - _handleSize)
             self.layoutDashedLineBorder()
             
             self.delegate?.stickerViewDidChangeZooming?(self, scale: scale)
