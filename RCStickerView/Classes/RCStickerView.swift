@@ -390,10 +390,10 @@ open class RCStickerView: UIView {
     public var outlineBorderColor: UIColor = .brown {
         didSet {
             if isDashedLine {
-                self.contentView?.layer.borderColor = outlineBorderColor.cgColor
+                dashedLineBorder.borderColor = outlineBorderColor.cgColor
             }
             else {
-                dashedLineBorder.borderColor = outlineBorderColor.cgColor
+                self.contentView?.layer.borderColor = outlineBorderColor.cgColor
             }
         }
     }
