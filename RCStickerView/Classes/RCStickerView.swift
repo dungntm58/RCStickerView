@@ -106,7 +106,7 @@ open class RCStickerView: UIView {
     }()
     
     private lazy var closeImageView: UIImageView = {
-        let _closeImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: defaultInset * 2, height: defaultInset * 2))
+        let _closeImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: _handleSize, height: _handleSize))
         _closeImageView.contentMode = .scaleAspectFit
         _closeImageView.backgroundColor = .clear
         _closeImageView.isUserInteractionEnabled = true
@@ -115,7 +115,7 @@ open class RCStickerView: UIView {
     }()
     
     private lazy var rotateImageView: UIImageView = {
-        let _rotateImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: defaultInset * 2, height: defaultInset * 2))
+        let _rotateImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: _handleSize, height: _handleSize))
         _rotateImageView.contentMode = .scaleAspectFit
         _rotateImageView.backgroundColor = .clear
         _rotateImageView.isUserInteractionEnabled = true
@@ -124,7 +124,7 @@ open class RCStickerView: UIView {
     }()
     
     private lazy var flipXImageView: UIImageView = {
-        let _flipImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: defaultInset * 2, height: defaultInset * 2))
+        let _flipImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: _handleSize, height: _handleSize))
         _flipImageView.contentMode = .scaleAspectFit
         _flipImageView.backgroundColor = .clear
         _flipImageView.isUserInteractionEnabled = true
@@ -133,7 +133,7 @@ open class RCStickerView: UIView {
     }()
     
     private lazy var flipYImageView: UIImageView = {
-        let _flipImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: defaultInset * 2, height: defaultInset * 2))
+        let _flipImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: _handleSize, height: _handleSize))
         _flipImageView.contentMode = .scaleAspectFit
         _flipImageView.backgroundColor = .clear
         _flipImageView.isUserInteractionEnabled = true
@@ -346,16 +346,16 @@ open class RCStickerView: UIView {
                 self.contentView?.layer.borderWidth = 0
             }
             
-            self.closeImageView.isHidden = !isEnableClose
+            self.closeImageView.isHidden = !(isEnableClose && shouldShowEditingHandlers)
             self.closeImageView.isUserInteractionEnabled = isEnableClose
             
-            self.rotateImageView.isHidden = !isEnableRotate
+            self.rotateImageView.isHidden = !(isEnableRotate && shouldShowEditingHandlers)
             self.rotateImageView.isUserInteractionEnabled = isEnableRotate
             
-            self.flipXImageView.isHidden = !(isEnableFlipX && isEnableFlip)
+            self.flipXImageView.isHidden = !(isEnableFlipX && isEnableFlip && shouldShowEditingHandlers)
             self.flipXImageView.isUserInteractionEnabled = isEnableFlipX && isEnableFlip
             
-            self.flipYImageView.isHidden = !(isEnableFlipY && isEnableFlip)
+            self.flipYImageView.isHidden = !(isEnableFlipY && isEnableFlip && shouldShowEditingHandlers)
             self.flipYImageView.isUserInteractionEnabled = isEnableFlipY && isEnableFlip
         }
     }
