@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'RCStickerView'
-  s.version          = '0.4.4'
+  s.version          = '0.4.5'
   s.summary          = 'Add label, image, other custom view as a sticker view.'
 
 # This description is used to generate tags and improve search results.

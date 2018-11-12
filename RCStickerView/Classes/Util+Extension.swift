@@ -39,3 +39,15 @@ func distance(from point1: CGPoint, to point2: CGPoint) -> CGFloat {
     let fy = point2.y - point1.y
     return sqrt(fx * fx + fy * fy)
 }
+
+internal extension UIView {
+    // Flip view horizontally
+    func flipX() {
+        transform = CGAffineTransform(scaleX: -transform.a, y: transform.d)
+    }
+    
+    // Flip view vertically.
+    func flipY() {
+        transform = CGAffineTransform(scaleX: transform.a, y: -transform.d)
+    }
+}

@@ -706,13 +706,13 @@ private extension RCStickerView {
     
     @objc func handleFlipXGesture(_ recognizer: UITapGestureRecognizer) {
         UIView.animate(withDuration: 0.35) {
-            self.contentView?.transform = CGAffineTransform(scaleX: -1, y: 1)
+            self.contentView?.flipX()
         }
     }
     
     @objc func handleFlipYGesture(_ recognizer: UITapGestureRecognizer) {
         UIView.animate(withDuration: 0.35) {
-            self.contentView?.transform = CGAffineTransform(scaleX: 1, y: -1)
+            self.contentView?.flipY()
         }
     }
     
