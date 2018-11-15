@@ -27,24 +27,15 @@ public enum MovingMode {
     case inside(view: UIView, ignoreHandler: Bool)
 }
 
-public enum ZoomMode {
-    case free
-    case insideSuperview
-    case inside(view: UIView)
-}
-
 @objc public protocol RCStickerViewDelegate: AnyObject {
     @objc optional func stickerViewDidBeginMoving(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidChangeMoving(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidEndMoving(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidBeginRotating(_ stickerView: RCStickerView)
-    @objc optional func stickerViewDidChangeRotating(_ stickerView: RCStickerView, angle: CGFloat)
+    @objc optional func stickerViewDidChangeRotating(_ stickerView: RCStickerView, angle: CGFloat, scale: CGFloat)
     @objc optional func stickerViewDidEndRotating(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidClose(_ stickerView: RCStickerView)
     @objc optional func stickerViewDidTap(_ stickerView: RCStickerView)
-    @objc optional func stickerViewDidBeginZooming(_ stickerView: RCStickerView)
-    @objc optional func stickerViewDidChangeZooming(_ stickerView: RCStickerView, scale: CGFloat)
-    @objc optional func stickerViewDidEndZooming(_ stickerView: RCStickerView)
 }
 
 @IBDesignable
@@ -61,6 +52,7 @@ open class RCStickerView: UIView {
     /**
      *  Variables for rotating and resizing view
      */
+    private var initialDistance: CGFloat = 0
     private var initialBounds: CGRect = .zero
     private var deltaAngle: CGFloat = 0
     private var _minimumSize: CGFloat = 0
@@ -94,8 +86,6 @@ open class RCStickerView: UIView {
     }()
     
     private lazy var tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture(_:)))
-    
-    private lazy var zoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(handleZoomGesture(_:)))
     
     private lazy var closeImageView: UIImageView = {
         let _closeImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: _handleSize, height: _handleSize))
@@ -157,7 +147,6 @@ open class RCStickerView: UIView {
     @IBOutlet public weak var delegate: RCStickerViewDelegate?
     
     public var movingMode: MovingMode = .free
-    public var zoomMode: ZoomMode = .free
     
     public func set(image: UIImage?, for handler: RCStickerViewHandler) {
         switch handler {
@@ -299,19 +288,6 @@ open class RCStickerView: UIView {
         }
     }
     
-    public var isEnableZooming: Bool = true {
-        didSet {
-            if isEnableZooming {
-                if !(gestureRecognizers?.contains(zoomGesture) ?? false) {
-                    addGestureRecognizer(zoomGesture)
-                }
-            }
-            else {
-                removeGestureRecognizer(zoomGesture)
-            }
-        }
-    }
-    
     public var shouldShowEditingHandlers: Bool = true {
         didSet {
             if shouldShowEditingHandlers {
@@ -408,15 +384,6 @@ open class RCStickerView: UIView {
         self.contentView.layer.allowsEdgeAntialiasing = true
         addSubview(contentView)
         
-        if isEnableZooming {
-            if !(gestureRecognizers?.contains(zoomGesture) ?? false) {
-                addGestureRecognizer(zoomGesture)
-            }
-        }
-        else {
-            removeGestureRecognizer(zoomGesture)
-        }
-        
         if isDashedLine {
             dashedLineBorder.removeFromSuperlayer()
             self.contentView.layer.addSublayer(dashedLineBorder)
@@ -475,10 +442,6 @@ private extension RCStickerView {
     func addGestures() {
         addGestureRecognizer(moveGesture)
         addGestureRecognizer(tapGesture)
-        guard contentView != nil else { return }
-        if !(gestureRecognizers?.contains(zoomGesture) ?? false) {
-            addGestureRecognizer(zoomGesture)
-        }
     }
     
     func initView() {
@@ -661,13 +624,21 @@ private extension RCStickerView {
         switch recognizer.state {
         case .began:
             deltaAngle = CGFloat(atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x - self.transform.angle)))
-            delegate?.stickerViewDidBeginRotating?(self)
+            initialBounds = self.bounds
+            initialDistance = distance(from: center, to: touchLocation)
+            self.delegate?.stickerViewDidBeginRotating?(self)
         case .changed:
             let angle = atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x))
             let angleDiff = deltaAngle - CGFloat(angle)
             self.transform = CGAffineTransform(rotationAngle: -angleDiff)
             
-            delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle))
+            var scale = distance(from: center, to: touchLocation) / initialDistance
+            let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
+            scale = max(scale, minimumScale)
+            self.bounds = initialBounds.scale(w: scale, h: scale)
+            self.setNeedsDisplay()
+            
+            self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: scale)
         case .ended:
             delegate?.stickerViewDidEndRotating?(self)
         default:
@@ -694,56 +665,6 @@ private extension RCStickerView {
     
     @objc func handleTapGesture(_ recognizer: UITapGestureRecognizer) {
         delegate?.stickerViewDidTap?(self)
-    }
-    
-    @objc func handleZoomGesture(_ recognizer: UIPinchGestureRecognizer) {
-        switch recognizer.state {
-        case .began:
-            initialBounds = self.bounds
-            recognizer.scale = 1
-            delegate?.stickerViewDidBeginZooming?(self)
-        case .changed:
-            var scale = recognizer.scale
-            let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
-            scale = max(scale, minimumScale)
-            var expectedBounds = initialBounds.scale(w: scale, h: scale)
-            
-            switch zoomMode {
-            case .free:
-                break
-            case .insideSuperview:
-                let view = self.superview ?? self.window
-                if let view = view {
-                    expectedBounds = calculateFrameWhileZooming(in: view, scale: scale, estimatedFrame: expectedBounds)
-                }
-            case .inside(let view):
-                expectedBounds = calculateFrameWhileZooming(in: view, scale: scale, estimatedFrame: expectedBounds)
-            }
-            
-            self.bounds = expectedBounds
-            self.contentView.frame = CGRect(x: defaultInset, y: defaultInset, width: frame.width - _handleSize, height: frame.height - _handleSize)
-            layoutDashedLineBorder()
-            
-            delegate?.stickerViewDidChangeZooming?(self, scale: scale)
-        case .ended:
-            self.transform = .identity
-            UIView.animate(withDuration: 0.35) { [self] in
-                switch zoomMode {
-                case .free:
-                    break
-                case .insideSuperview:
-                    let view = self.superview ?? self.window
-                    if let view = view {
-                        layoutInsideBounds(in: view)
-                    }
-                case .inside(let view):
-                    layoutInsideBounds(in: view)
-                }
-            }
-            delegate?.stickerViewDidEndZooming?(self)
-        default:
-            return
-        }
     }
     
     func layoutDashedLineBorder() {
