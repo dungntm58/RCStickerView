@@ -30,6 +30,7 @@ class ViewController: UIViewController {
         stickerView.isDashedLine = true
         stickerView.movingMode = .insideSuperview(ignoreHandler: true)
 //        stickerView.zoomMode = .insideSuperview
+        stickerView.shouldScaleContent = true
         
         self.containerView.addSubview(stickerView)
         

@@ -147,6 +147,7 @@ open class RCStickerView: UIView {
     @IBOutlet public weak var delegate: RCStickerViewDelegate?
     
     public var movingMode: MovingMode = .free
+    public var shouldScaleContent = false
     
     public func set(image: UIImage?, for handler: RCStickerViewHandler) {
         switch handler {
@@ -635,7 +636,17 @@ private extension RCStickerView {
             var scale = distance(from: center, to: touchLocation) / initialDistance
             let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
             scale = max(scale, minimumScale)
-            self.bounds = initialBounds.scale(w: scale, h: scale)
+            if shouldScaleContent {
+                self.contentView.transform = CGAffineTransform(scaleX: scale, y: scale)
+                
+                self.set(position: .topLeft, for: positionHandlerMap[.topLeft]!)
+                self.set(position: .topRight, for: positionHandlerMap[.topRight]!)
+                self.set(position: .bottomLeft, for: positionHandlerMap[.bottomLeft]!)
+                self.set(position: .bottomRight, for: positionHandlerMap[.bottomRight]!)
+            }
+            else {
+                self.bounds = initialBounds.scale(w: scale, h: scale)
+            }
             self.setNeedsDisplay()
             
             self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: scale)
