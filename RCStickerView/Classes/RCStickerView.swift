@@ -42,6 +42,7 @@ public enum MovingMode {
 open class RCStickerView: UIView {
     private var defaultInset: CGFloat = 0
     private var defaultMinimumSize: CGFloat = 0
+    private var defaultMaximumSize: CGFloat = 0
     
     /**
      *  Variables for moving view
@@ -56,6 +57,7 @@ open class RCStickerView: UIView {
     private var initialBounds: CGRect = .zero
     private var deltaAngle: CGFloat = 0
     private var _minimumSize: CGFloat = 0
+    private var _maximumSize: CGFloat = 0
     private var _handleSize: CGFloat = 0
     
     private var contentView: UIView!
@@ -362,6 +364,15 @@ open class RCStickerView: UIView {
         }
     }
     
+    public var maximumSize: CGFloat {
+        set(size) {
+            _maximumSize = min(size, defaultMaximumSize)
+        }
+        get {
+            return _maximumSize
+        }
+    }
+    
     public var outlineBorderColor: UIColor = .brown {
         didSet {
             if isDashedLine {
@@ -378,6 +389,7 @@ open class RCStickerView: UIView {
     public init(contentView: UIView) {
         defaultInset = 11
         defaultMinimumSize = 4 * defaultInset
+        defaultMaximumSize = UIScreen.main.bounds.width
         _handleSize = 2 * defaultInset
         
         let frame = CGRect(x: 0, y: 0, width: contentView.frame.width + _handleSize, height: contentView.frame.height + _handleSize)
@@ -493,6 +505,7 @@ private extension RCStickerView {
     func commonInit() {
         defaultInset = 11
         defaultMinimumSize = 4 * defaultInset
+        defaultMaximumSize = UIScreen.main.bounds.width
         _handleSize = 2 * defaultInset
         initView()
         initMap()
@@ -656,7 +669,8 @@ private extension RCStickerView {
             
             var scale = distance(from: center, to: touchLocation) / initialDistance
             let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
-            scale = max(scale, minimumScale)
+            let maximumScale = self._maximumSize / max(initialBounds.width, initialBounds.height)
+            scale = min(max(scale, minimumScale), maximumScale)
             if shouldScaleContent {
                 self.contentView.transform = CGAffineTransform(scaleX: scale, y: scale)
                 
