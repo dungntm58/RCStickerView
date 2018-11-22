@@ -542,15 +542,7 @@ private extension RCStickerView {
     }
     
     private func onBeginMoving(_ recognizer: UIPanGestureRecognizer) {
-        var touchLocation: CGPoint
-        switch movingMode {
-        case .free, .insideSuperview(_):
-            touchLocation = recognizer.location(in: self.superview)
-        case .inside(let view, _):
-            touchLocation = recognizer.location(in: view)
-        }
-        
-        beginningPoint = touchLocation
+        beginningPoint = recognizer.location(in: self.superview)
         beginningCenter = self.center
     }
     
@@ -607,11 +599,11 @@ private extension RCStickerView {
                 }
             }
         case .inside(let view, let ignoreHandler):
-            touchLocation = recognizer.location(in: view)
+            touchLocation = recognizer.location(in: self.superview)
             let frameInSuperview = view.convert(view.bounds, to: self.superview)
             
-            x = beginningCenter.x + (touchLocation.x - beginningPoint.x)
-            y = beginningCenter.y + (touchLocation.y - beginningPoint.y)
+            x = beginningCenter.x + touchLocation.x - beginningPoint.x
+            y = beginningCenter.y + touchLocation.y - beginningPoint.y
             
             var topPadding: CGFloat = 0
             var leftPadding: CGFloat = 0
@@ -619,33 +611,33 @@ private extension RCStickerView {
             var bottomPadding: CGFloat = 0
             if ignoreHandler {
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.topRight]! {
-                    topPadding = _handleSize / 2 - frameInSuperview.origin.y
+                    topPadding = _handleSize / 2
                 }
                 if positionVisibilityMap[.topLeft]! || positionVisibilityMap[.bottomLeft]! {
-                    leftPadding = _handleSize / 2 - frameInSuperview.origin.x
+                    leftPadding = _handleSize / 2
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.topRight]! {
-                    rightPadding = _handleSize / 2 + frameInSuperview.origin.x
+                    rightPadding = _handleSize / 2
                 }
                 if positionVisibilityMap[.bottomRight]! || positionVisibilityMap[.bottomLeft]! {
-                    bottomPadding = _handleSize / 2 + frameInSuperview.origin.y
+                    bottomPadding = _handleSize / 2
                 }
             }
             
-            if x < frame.width / 2 - leftPadding {
-                x = frame.width / 2 - leftPadding
+            if x < frame.width / 2 - leftPadding + frameInSuperview.origin.x {
+                x = frame.width / 2 - leftPadding + frameInSuperview.origin.x
             }
             
-            if y < frame.height / 2 - topPadding {
-                y = frame.height / 2 - topPadding
+            if y < frame.height / 2 - topPadding + frameInSuperview.origin.y {
+                y = frame.height / 2 - topPadding + frameInSuperview.origin.y
             }
             
-            if x > frameInSuperview.width - frame.width / 2 + rightPadding {
-                x = frameInSuperview.width - frame.width / 2 + rightPadding
+            if x > frameInSuperview.width - frame.width / 2 + rightPadding + frameInSuperview.origin.x {
+                x = frameInSuperview.width - frame.width / 2 + rightPadding + frameInSuperview.origin.x
             }
             
-            if y > frameInSuperview.height - frame.height / 2 + bottomPadding {
-                y = frameInSuperview.height - frame.height / 2 + bottomPadding
+            if y > frameInSuperview.height - frame.height / 2 + bottomPadding + frameInSuperview.origin.y {
+                y = frameInSuperview.height - frame.height / 2 + bottomPadding + frameInSuperview.origin.y
             }
         }
         
