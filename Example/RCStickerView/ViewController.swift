@@ -27,25 +27,26 @@ class ViewController: UIViewController {
         stickerView.set(image: UIImage(named: "Flip"), for: .flipX)
         stickerView.isEnableFlipY = false
         stickerView.handlerSize = 40
-        stickerView.isDashedLine = true
-        stickerView.movingMode = .insideSuperview(ignoreHandler: true)
+//        stickerView.isDashedLine = true
+        stickerView.movingMode = .inside(view: self.containerView, ignoreHandler: false)
 //        stickerView.zoomMode = .insideSuperview
-        stickerView.shouldScaleContent = true
+//        stickerView.shouldScaleContent = true
         
-        self.containerView.addSubview(stickerView)
+        self.view.addSubview(stickerView)
+        stickerView.center = self.containerView.center
         
-        let testLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
-        testLabel.text = "Test Label"
-        testLabel.textAlignment = .center
+//        let testLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
+//        testLabel.text = "Test Label"
+//        testLabel.textAlignment = .center
         
-        let stickerView2 = RCStickerView(contentView: testLabel)
-        stickerView2.center = CGPoint(x: 100, y: 100)
-        stickerView2.delegate = self
-        stickerView2.set(image: UIImage(named: "Close"), for: .close)
-        stickerView2.set(image: UIImage(named: "Rotate"), for: .rotate)
-        stickerView2.isEnableFlip = false
-        stickerView2.shouldShowEditingHandlers = true
-        self.view.addSubview(stickerView2)
+//        let stickerView2 = RCStickerView(contentView: testLabel)
+//        stickerView2.center = CGPoint(x: 100, y: 100)
+//        stickerView2.delegate = self
+//        stickerView2.set(image: UIImage(named: "Close"), for: .close)
+//        stickerView2.set(image: UIImage(named: "Rotate"), for: .rotate)
+//        stickerView2.isEnableFlip = false
+//        stickerView2.shouldShowEditingHandlers = true
+//        self.view.addSubview(stickerView2)
         
         self.selectedView = stickerView
     }
