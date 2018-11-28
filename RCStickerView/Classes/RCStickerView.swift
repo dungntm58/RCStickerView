@@ -231,7 +231,7 @@ open class RCStickerView: UIView {
             defaultInset = round(size / 2)
             defaultMinimumSize = 4 * defaultInset
             _handleSize = size
-
+            
             let originalCenter = self.center
             let originalTransform = self.transform
             let frame = CGRect(x: 0, y: 0, width: self.contentView.frame.width + size, height: self.contentView.frame.height + size)
@@ -659,24 +659,23 @@ private extension RCStickerView {
             let angleDiff = deltaAngle - CGFloat(angle)
             self.transform = CGAffineTransform(rotationAngle: -angleDiff)
             
-            var scale = distance(from: center, to: touchLocation) / initialDistance
-            let minimumScale = self._minimumSize / min(initialBounds.width, initialBounds.height)
-            let maximumScale = self._maximumSize / max(initialBounds.width, initialBounds.height)
-            scale = min(max(scale, minimumScale), maximumScale)
-            if shouldScaleContent {
-                self.contentView.transform = CGAffineTransform(scaleX: scale, y: scale)
-                
-                self.set(position: .topLeft, for: positionHandlerMap[.topLeft]!)
-                self.set(position: .topRight, for: positionHandlerMap[.topRight]!)
-                self.set(position: .bottomLeft, for: positionHandlerMap[.bottomLeft]!)
-                self.set(position: .bottomRight, for: positionHandlerMap[.bottomRight]!)
-            }
-            else {
-                self.bounds = initialBounds.scale(w: scale, h: scale)
-            }
-            self.setNeedsDisplay()
+            let scale = distance(from: center, to: touchLocation) / initialDistance
+            let newBounds = initialBounds.scale(w: scale, h: scale)
             
-            self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: scale)
+            if min(newBounds.width, newBounds.height) >= _minimumSize && max(newBounds.width, newBounds.height) <= _maximumSize {
+                if shouldScaleContent {
+                    self.contentView.transform = CGAffineTransform(scaleX: scale, y: scale)
+                    
+                    self.set(position: .topLeft, for: positionHandlerMap[.topLeft]!)
+                    self.set(position: .topRight, for: positionHandlerMap[.topRight]!)
+                    self.set(position: .bottomLeft, for: positionHandlerMap[.bottomLeft]!)
+                    self.set(position: .bottomRight, for: positionHandlerMap[.bottomRight]!)
+                }
+                else {
+                    self.bounds = initialBounds.scale(w: scale, h: scale)
+                }
+                self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: scale)
+            }
         case .ended:
             self.delegate?.stickerViewDidEndRotating?(self)
         default:
