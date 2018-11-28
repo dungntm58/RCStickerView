@@ -35,18 +35,19 @@ class ViewController: UIViewController {
         self.view.addSubview(stickerView)
         stickerView.center = self.containerView.center
         
-//        let testLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
-//        testLabel.text = "Test Label"
-//        testLabel.textAlignment = .center
+        let testLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
+        testLabel.text = "Test Label"
+        testLabel.textAlignment = .center
         
-//        let stickerView2 = RCStickerView(contentView: testLabel)
-//        stickerView2.center = CGPoint(x: 100, y: 100)
-//        stickerView2.delegate = self
-//        stickerView2.set(image: UIImage(named: "Close"), for: .close)
-//        stickerView2.set(image: UIImage(named: "Rotate"), for: .rotate)
-//        stickerView2.isEnableFlip = false
-//        stickerView2.shouldShowEditingHandlers = true
-//        self.view.addSubview(stickerView2)
+        let stickerView2 = RCStickerView(contentView: testLabel)
+        stickerView2.center = CGPoint(x: 100, y: 100)
+        stickerView2.delegate = self
+        stickerView2.set(image: UIImage(named: "Close"), for: .close)
+        stickerView2.set(image: UIImage(named: "Rotate"), for: .rotate)
+        stickerView2.isEnableFlip = false
+        stickerView2.shouldShowEditingHandlers = true
+        self.view.addSubview(stickerView2)
+        stickerView2.center = self.containerView.center
         
         self.selectedView = stickerView
     }
