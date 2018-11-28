@@ -55,6 +55,7 @@ open class RCStickerView: UIView {
      */
     private var initialDistance: CGFloat = 0
     private var initialBounds: CGRect = .zero
+    private var initialCenter: CGPoint = .zero
     private var deltaAngle: CGFloat = 0
     private var _minimumSize: CGFloat = 0
     private var _maximumSize: CGFloat = 0
@@ -388,6 +389,11 @@ open class RCStickerView: UIView {
     }
     
     public func set(contentView: UIView) {
+        if let gestures = self.contentView?.gestureRecognizers {
+            gestures.forEach {
+                self.contentView?.removeGestureRecognizer($0)
+            }
+        }
         self.contentView?.removeFromSuperview()
         
         self.contentView = contentView
@@ -395,7 +401,8 @@ open class RCStickerView: UIView {
         self.contentView.isUserInteractionEnabled = true
         self.contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.contentView.layer.allowsEdgeAntialiasing = true
-        addSubview(contentView)
+        self.addSubview(contentView)
+        self.addGestures()
         
         if isDashedLine {
             dashedLineBorder.removeFromSuperlayer()
@@ -453,13 +460,13 @@ open class RCStickerView: UIView {
 
 private extension RCStickerView {
     func addGestures() {
-        addGestureRecognizer(moveGesture)
-        addGestureRecognizer(tapGesture)
+        contentView?.addGestureRecognizer(moveGesture)
+        contentView?.addGestureRecognizer(tapGesture)
+        moveGesture.require(toFail: rotateGesture)
     }
     
     func initView() {
         self.backgroundColor = .clear
-        addGestures()
         
         // Setup editing handlers
         addSubview(closeImageView)
@@ -624,21 +631,22 @@ private extension RCStickerView {
     }
     
     @objc func handleRotateGesture(_ recognizer: UIPanGestureRecognizer) {
-        let touchLocation = recognizer.location(in: superview)
-        let center = self.center
+        let touchLocation = recognizer.location(in: self.superview)
         
         switch recognizer.state {
         case .began:
             deltaAngle = CGFloat(atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x - self.transform.angle)))
             initialBounds = self.bounds
-            initialDistance = distance(from: center, to: touchLocation)
+            initialCenter = self.center
+            initialDistance = distance(from: initialCenter, to: touchLocation)
             self.delegate?.stickerViewDidBeginRotating?(self)
         case .changed:
-            let angle = atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x))
+            self.center = initialCenter
+            let angle = atan2f(Float(touchLocation.y - initialCenter.y), Float(touchLocation.x - initialCenter.x))
             let angleDiff = deltaAngle - CGFloat(angle)
             self.transform = CGAffineTransform(rotationAngle: -angleDiff)
             
-            let scale = distance(from: center, to: touchLocation) / initialDistance
+            let scale = distance(from: initialCenter, to: touchLocation) / initialDistance
             let newBounds = initialBounds.scale(w: scale, h: scale)
             
             if min(newBounds.width, newBounds.height) >= _minimumSize && max(newBounds.width, newBounds.height) <= _maximumSize {
@@ -656,7 +664,8 @@ private extension RCStickerView {
                 self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: scale)
             }
         case .ended:
-            delegate?.stickerViewDidEndRotating?(self)
+            self.center = initialCenter
+            self.delegate?.stickerViewDidEndRotating?(self)
         default:
             break
         }
