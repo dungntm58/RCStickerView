@@ -56,6 +56,7 @@ open class RCStickerView: UIView {
     private var initialDistance: CGFloat = 0
     private var initialBounds: CGRect = .zero
     private var initialCenter: CGPoint = .zero
+    private var currentScale: CGFloat = 1
     private var deltaAngle: CGFloat = 0
     private var _minimumSize: CGFloat = 0
     private var _maximumSize: CGFloat = 0
@@ -659,6 +660,7 @@ private extension RCStickerView {
             deltaAngle = CGFloat(atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x))) - self.transform.angle
             initialBounds = self.bounds
             initialCenter = self.center
+            currentScale = 1
             initialDistance = distance(from: initialCenter, to: touchLocation)
             self.delegate?.stickerViewDidBeginRotating?(self)
         case .changed:
@@ -682,8 +684,13 @@ private extension RCStickerView {
                 else {
                     self.bounds = initialBounds.scale(w: scale, h: scale)
                 }
-                self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: scale)
+                currentScale = scale
             }
+            else {
+                currentScale = 1
+            }
+            
+            self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: scale)
         case .ended:
             self.center = initialCenter
             self.delegate?.stickerViewDidEndRotating?(self)
