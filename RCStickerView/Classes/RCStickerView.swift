@@ -656,7 +656,7 @@ private extension RCStickerView {
         
         switch recognizer.state {
         case .began:
-            deltaAngle = CGFloat(atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x - self.transform.angle)))
+            deltaAngle = CGFloat(atan2f(Float(touchLocation.y - center.y), Float(touchLocation.x - center.x))) - self.transform.angle
             initialBounds = self.bounds
             initialCenter = self.center
             initialDistance = distance(from: initialCenter, to: touchLocation)
