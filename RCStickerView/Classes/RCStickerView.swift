@@ -542,7 +542,6 @@ private extension RCStickerView {
             onMoving(recognizer)
             self.delegate?.stickerViewDidChangeMoving?(self)
         case .ended:
-            onMoving(recognizer)
             self.delegate?.stickerViewDidEndMoving?(self)
         default:
             break
@@ -685,9 +684,6 @@ private extension RCStickerView {
                     self.bounds = initialBounds.scale(w: scale, h: scale)
                 }
                 currentScale = scale
-            }
-            else {
-                currentScale = 1
             }
             
             self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: scale)
