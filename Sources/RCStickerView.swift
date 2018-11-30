@@ -660,7 +660,7 @@ private extension RCStickerView {
                     self.set(position: .bottomRight, for: positionHandlerMap[.bottomRight]!)
                 }
                 else {
-                    self.bounds = initialBounds.scale(w: scale, h: scale)
+                    self.bounds = newBounds
                 }
                 currentScale = scale
             }
