@@ -665,7 +665,7 @@ private extension RCStickerView {
                 currentScale = scale
             }
             
-            self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: scale)
+            self.delegate?.stickerViewDidChangeRotating?(self, angle: CGFloat(angle), scale: currentScale)
         case .ended:
             self.center = initialCenter
             self.delegate?.stickerViewDidEndRotating?(self)
