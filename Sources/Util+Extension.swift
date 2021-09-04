@@ -10,13 +10,11 @@ import Foundation
 extension CGRect {
     
     // CGRectGetCenter
-    var center: CGPoint {
-        return CGPoint(x: midX, y: midY)
-    }
+    var center: CGPoint { CGPoint(x: midX, y: midY) }
     
     // CGRectScale
     func scale(w: CGFloat, h: CGFloat) -> CGRect {
-        return CGRect(x: origin.x, y: origin.y, width: width * w, height: height * h)
+        CGRect(x: origin.x, y: origin.y, width: width * w, height: height * h)
     }
     
     mutating func scaled(w: CGFloat, h: CGFloat) {
@@ -28,9 +26,7 @@ extension CGRect {
 extension CGAffineTransform {
     
     // CGAffineTransformGetAngle
-    var angle: CGFloat {
-        return atan2(b, a)
-    }
+    var angle: CGFloat { atan2(b, a) }
 }
 
 // CGPointGetDistance
@@ -40,7 +36,7 @@ func distance(from point1: CGPoint, to point2: CGPoint) -> CGFloat {
     return sqrt(fx * fx + fy * fy)
 }
 
-internal extension UIView {
+extension UIView {
     // Flip view horizontally
     func flipX() {
         transform = CGAffineTransform(scaleX: -transform.a, y: transform.d)
