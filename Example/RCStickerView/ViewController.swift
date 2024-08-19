@@ -46,6 +46,8 @@ class ViewController: UIViewController {
         stickerView2.set(image: UIImage(named: "Rotate"), for: .rotate)
         stickerView2.isEnableFlip = false
         stickerView2.shouldShowEditingHandlers = true
+        stickerView2.shouldScaleContent = true
+
         self.view.addSubview(stickerView2)
         stickerView2.center = self.containerView.center
         

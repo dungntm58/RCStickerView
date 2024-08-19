@@ -487,6 +487,7 @@ private extension RCStickerView {
         self.isEnableFlipY = true
         
         self._minimumSize = defaultMinimumSize
+        self._maximumSize = defaultMaximumSize
     }
     
     func commonInit() {
